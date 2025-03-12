@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-^&9tb()frto^8c(tk__kvc%-gj8tsjn!6k(lw22qv9=*hq9j)a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['nanik-ims.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
