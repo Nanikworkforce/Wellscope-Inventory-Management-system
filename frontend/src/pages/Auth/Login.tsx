@@ -52,15 +52,29 @@ const Login = () => {
         formData
       );
       
-      if (response.data.access) {
-        console.log("Login API response:", response.data);
-        localStorage.setItem('accessToken', response.data.access);
-        localStorage.setItem('refreshToken', response.data.refresh);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+      // Debug: Log the response structure
+      console.log('Login response:', response.data);
+
+      // Check for token in different possible response structures
+      const accessToken = response.data.access || response.data.token?.access || response.data.token;
+      
+      if (accessToken) {
+        // Store the tokens
+        localStorage.setItem('accessToken', accessToken);
+        
+        // Store refresh token if it exists
+        if (response.data.refresh || response.data.token?.refresh) {
+          localStorage.setItem('refreshToken', response.data.refresh || response.data.token.refresh);
+        }
+        
+        // Set the default Authorization header for all future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+        
+        // Navigate to dashboard
         navigate('/dashboard', { replace: true });
-        console.log('Login successful, redirecting to dashboard...');
       } else {
-        setError('Invalid response from server');
+        console.error('No access token found in response:', response.data);
+        setError('Invalid response from server: No access token found');
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -70,8 +84,10 @@ const Login = () => {
           || errorData.detail 
           || 'Login failed';
         setError(errorMessage);
+        console.error('Login error:', errorData);
       } else {
         setError('Login failed. Please try again.');
+        console.error('Login error:', err);
       }
     }
   };
