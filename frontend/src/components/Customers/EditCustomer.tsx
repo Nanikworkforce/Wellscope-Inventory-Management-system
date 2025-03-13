@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config';
 
 interface CustomerFormData {
   company_name: string;
@@ -34,7 +35,7 @@ const EditCustomer: React.FC = () => {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/clients/${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/clients/${id}/`);
         setFormData(response.data);
         setLoading(false);
       } catch (err) {
@@ -59,7 +60,7 @@ const EditCustomer: React.FC = () => {
     setError(null);
 
     try {
-      await axios.put(`http://localhost:8000/api/clients/${id}/`, formData);
+      await axios.put(`${API_BASE_URL}/clients/${id}/`, formData);
       navigate('/customers');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

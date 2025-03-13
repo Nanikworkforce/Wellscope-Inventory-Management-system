@@ -35,6 +35,7 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 interface Project {
   id: number;
@@ -73,12 +74,10 @@ const ProjectList: React.FC = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/projects/');
-        console.log('Projects data:', response.data);
+        const response = await axios.get(`${API_BASE_URL}/projects/`);
         setProjects(response.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching projects:', err);
         setError('Failed to fetch projects');
         setLoading(false);
       }
@@ -123,12 +122,11 @@ const ProjectList: React.FC = () => {
   const confirmDelete = async () => {
     if (projectToDelete) {
       try {
-        await axios.delete(`http://localhost:8000/api/projects/${projectToDelete}/`);
+        await axios.delete(`${API_BASE_URL}/projects/${projectToDelete}/`);
         setProjects(projects.filter(project => project.id !== projectToDelete));
         setDeleteDialogOpen(false);
         setProjectToDelete(null);
       } catch (err) {
-        console.error('Error deleting project:', err);
         setError('Failed to delete project');
       }
     }

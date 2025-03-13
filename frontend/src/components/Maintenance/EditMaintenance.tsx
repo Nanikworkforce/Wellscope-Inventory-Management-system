@@ -6,6 +6,7 @@ import {
 import { MaintenanceRecord } from '../../types';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { API_BASE_URL } from '../../config';
 
 interface EditMaintenanceProps {
   record: MaintenanceRecord | null;
@@ -28,6 +29,27 @@ const EditMaintenance: React.FC<EditMaintenanceProps> = ({ record, onClose, onSa
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setFormData({ ...formData, [field]: event.target.value });
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/maintenance/${record.id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update maintenance record');
+      }
+
+      const updatedRecord = await response.json();
+      onSave(updatedRecord);
+    } catch (error) {
+      console.error('Error updating maintenance:', error);
+    }
   };
 
   return (
@@ -102,7 +124,7 @@ const EditMaintenance: React.FC<EditMaintenanceProps> = ({ record, onClose, onSa
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button 
-          onClick={() => onSave(formData)}
+          onClick={handleSave}
           variant="contained"
           sx={{ bgcolor: '#d47f39', '&:hover': { bgcolor: '#c2410c' } }}
         >

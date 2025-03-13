@@ -48,6 +48,7 @@ import {
   BarChart,
 } from '@mui/icons-material';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 const EquipmentList: React.FC = () => {
   const [equipment, setEquipment] = useState<Equipment[]>([]);
@@ -59,7 +60,11 @@ const EquipmentList: React.FC = () => {
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/equipment/');
+        const response = await fetch(`${API_BASE_URL}/equipment/`, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
         if (!response.ok) {
           throw new Error('Failed to fetch equipment data');
         }
@@ -101,7 +106,7 @@ const EquipmentList: React.FC = () => {
     if (!equipmentToDelete) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/equipment/${equipmentToDelete}/`, {
+      const response = await fetch(`${API_BASE_URL}/equipment/${equipmentToDelete}/`, {
         method: 'DELETE',
       });
 

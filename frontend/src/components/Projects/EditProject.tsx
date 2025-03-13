@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config';
 
 interface ProjectFormData {
   name: string;
@@ -81,9 +82,9 @@ const EditProject: React.FC = () => {
     const fetchData = async () => {
       try {
         const [projectRes, clientsRes, locationsRes] = await Promise.all([
-          axios.get(`http://localhost:8000/api/projects/${id}/`),
-          axios.get('http://localhost:8000/api/clients/'),
-          axios.get('http://localhost:8000/api/locations/'),
+          axios.get(`${API_BASE_URL}/projects/${id}/`),
+          axios.get(`${API_BASE_URL}/clients/`),
+          axios.get(`${API_BASE_URL}/locations/`),
         ]);
 
         setFormData({
@@ -104,7 +105,6 @@ const EditProject: React.FC = () => {
         setLocations(locationsRes.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching data:', err);
         setError('Failed to fetch project data');
         setLoading(false);
       }
@@ -126,11 +126,14 @@ const EditProject: React.FC = () => {
     setError(null);
 
     try {
-      await axios.put(`http://localhost:8000/api/projects/${id}/`, formData);
+      await axios.put(`${API_BASE_URL}/projects/${id}/`, formData);
       navigate('/projects');
     } catch (err) {
-      console.error('Error updating project:', err);
-      setError('Failed to update project');
+      if (axios.isAxiosError(err) && err.response) {
+        setError(JSON.stringify(err.response.data));
+      } else {
+        setError('Failed to update project');
+      }
     }
   };
 

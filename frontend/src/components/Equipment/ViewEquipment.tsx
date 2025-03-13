@@ -28,6 +28,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Equipment } from '../../types';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 const ViewEquipment: React.FC = () => {
   const navigate = useNavigate();
@@ -39,13 +40,10 @@ const ViewEquipment: React.FC = () => {
   useEffect(() => {
     const fetchEquipment = async () => {
       try {
-        console.log('Fetching equipment with ID:', id);
-        const response = await axios.get(`http://localhost:8000/api/equipment/${id}/`);
-        console.log('Response data:', response.data);
+        const response = await axios.get(`${API_BASE_URL}/equipment/${id}/`);
         setEquipment(response.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching equipment:', err);
         setError('Failed to fetch equipment data');
         setLoading(false);
       }

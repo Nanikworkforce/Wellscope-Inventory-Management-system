@@ -28,6 +28,7 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import oilBg from '../../assets/images/oilbg.jpg';
+import { API_BASE_URL } from '../../config';
 
 interface Client {
   id: number;
@@ -50,7 +51,7 @@ const CustomerList: React.FC = () => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/clients/');
+        const response = await axios.get(`${API_BASE_URL}/clients/`);
         setCustomers(response.data);
         setLoading(false);
       } catch (err) {
@@ -71,7 +72,7 @@ const CustomerList: React.FC = () => {
   const confirmDelete = async () => {
     if (customerToDelete) {
       try {
-        await axios.delete(`http://localhost:8000/api/clients/${customerToDelete}/`);
+        await axios.delete(`${API_BASE_URL}/clients/${customerToDelete}/`);
         setCustomers(customers.filter(customer => customer.id !== customerToDelete));
       } catch (err) {
         setError('Failed to delete customer');

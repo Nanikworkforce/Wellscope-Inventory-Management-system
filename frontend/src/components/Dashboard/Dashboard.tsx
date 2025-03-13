@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Grid, Paper, Typography, Select, MenuItem } from '@mui/material';
 import { 
   Assignment,
@@ -8,24 +8,65 @@ import {
 } from '@mui/icons-material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
+import axios from 'axios';
+
+interface DashboardStats {
+  require_inspection: number;
+  require_maintenance: number;
+  in_operation: number;
+  require_repair: number;
+  total_equipment: number;
+  current_value: number;
+  utilization_percentage: number;
+  usage_trends: { month: string; value: number; }[];
+}
 
 const Dashboard: React.FC = () => {
-  // Sample data for the line chart
-  const usageData = [
-    { month: 'Jan', value: 2000 },
-    { month: 'Feb', value: 3800 },
-    { month: 'Mar', value: 3000 },
-    { month: 'Apr', value: 4500 },
-    { month: 'May', value: 5000 },
-    { month: 'Jun', value: 4000 },
-    { month: 'Jul', value: 6000 },
-  ];
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/dashboard/stats/`);
+        setStats(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch dashboard data');
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const statsCards = [
-    { title: 'Require Inspection', value: '25', icon: <Assignment />, color: '#4B5563' },
-    { title: 'Require Maintenance', value: '10', icon: <Build />, color: '#4B5563' },
-    { title: 'In Operation', value: '33', icon: <PowerSettingsNew />, color: '#EAB308' },
-    { title: 'Require Repair', value: '45', icon: <BuildCircle />, color: '#4B5563' },
+    { 
+      title: 'Require Inspection', 
+      value: stats?.require_inspection || '0', 
+      icon: <Assignment />, 
+      color: '#4B5563' 
+    },
+    { 
+      title: 'Require Maintenance', 
+      value: stats?.require_maintenance || '0', 
+      icon: <Build />, 
+      color: '#4B5563' 
+    },
+    { 
+      title: 'In Operation', 
+      value: stats?.in_operation || '0', 
+      icon: <PowerSettingsNew />, 
+      color: '#EAB308' 
+    },
+    { 
+      title: 'Require Repair', 
+      value: stats?.require_repair || '0', 
+      icon: <BuildCircle />, 
+      color: '#4B5563' 
+    },
   ];
 
   return (
@@ -146,7 +187,7 @@ const Dashboard: React.FC = () => {
                   fill="none"
                   stroke="#F97316"
                   strokeWidth="3.2"
-                  strokeDasharray={`${35 * 100 / 100} 100`}
+                  strokeDasharray={`${(stats?.utilization_percentage || 0) * 100 / 100} 100`}
                 />
               </svg>
               <Box
@@ -171,7 +212,9 @@ const Dashboard: React.FC = () => {
                 >
                   Total Equipment
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>100</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                  {stats?.total_equipment || 0}
+                </Typography>
               </Box>
               <Box>
                 <Typography 
@@ -179,7 +222,9 @@ const Dashboard: React.FC = () => {
                 >
                   Current Value
                 </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>$33,000</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                  ${stats?.current_value?.toLocaleString() || '0'}
+                </Typography>
               </Box>
             </Box>
           </Paper>
@@ -219,7 +264,7 @@ const Dashboard: React.FC = () => {
               </Select>
             </Box>
 
-            <LineChart width={750} height={400} data={usageData}>
+            <LineChart width={750} height={400} data={stats?.usage_trends || []}>
               <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
               <XAxis dataKey="month" axisLine={false} tickLine={false} />
               <YAxis axisLine={false} tickLine={false} />

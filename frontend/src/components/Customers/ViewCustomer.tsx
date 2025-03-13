@@ -18,6 +18,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config';
 
 interface Customer {
   id: number;
@@ -39,13 +40,10 @@ const ViewCustomer: React.FC = () => {
   useEffect(() => {
     const fetchCustomer = async () => {
       try {
-        console.log('Fetching customer with ID:', id);
-        const response = await axios.get(`http://localhost:8000/api/clients/${id}/`);
-        console.log('Response data:', response.data);
+        const response = await axios.get(`${API_BASE_URL}/clients/${id}/`);
         setCustomer(response.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching customer:', err);
         setError('Failed to fetch customer data');
         setLoading(false);
       }
@@ -93,9 +91,8 @@ const ViewCustomer: React.FC = () => {
             <IconButton 
               color="error"
               onClick={() => {
-                // You could reuse the delete logic from CustomerList
                 if (window.confirm('Are you sure you want to delete this customer?')) {
-                  axios.delete(`http://localhost:8000/api/clients/${id}/`)
+                  axios.delete(`${API_BASE_URL}/clients/${id}/`)
                     .then(() => navigate('/customers'))
                     .catch(() => setError('Failed to delete customer'));
                 }

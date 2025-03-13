@@ -42,6 +42,7 @@ import { Equipment } from '../../types';
 import bgImage from '../../assets/images/bg.jpg';
 import ScheduleMaintenance from './ScheduleMaintenance.tsx';
 import EditMaintenance from './EditMaintenance.tsx';
+import { API_BASE_URL } from '../../config';
 
 interface MaintenanceRecord {
   id: string;
@@ -84,12 +85,11 @@ const MaintenanceList: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/maintenance/', {
+      const response = await fetch(`${API_BASE_URL}/maintenance/`, {
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          // Add your authentication header here if needed
-          // 'Authorization': `Bearer ${yourAuthToken}`
-        },
+        }
       });
 
       if (!response.ok) {
@@ -184,7 +184,7 @@ const MaintenanceList: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/maintenance/${id}/`, {
+      const response = await fetch(`${API_BASE_URL}/maintenance/${id}/`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ const MaintenanceList: React.FC = () => {
 
   const handleSaveEdit = async (updatedRecord: MaintenanceRecord) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/maintenance/${updatedRecord.id}/`, {
+      const response = await fetch(`${API_BASE_URL}/maintenance/${updatedRecord.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

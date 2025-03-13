@@ -28,6 +28,7 @@ import {
   PriorityHigh,
   Engineering,
 } from '@mui/icons-material';
+import { API_BASE_URL } from '../../config';
 
 interface Equipment {
   id: string;
@@ -101,7 +102,7 @@ const ScheduleMaintenance: React.FC<ScheduleMaintenanceProps> = ({
   const fetchEquipmentList = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/equipment/');
+      const response = await fetch(`${API_BASE_URL}/equipment/`);
       if (!response.ok) {
         throw new Error('Failed to fetch equipment list');
       }
@@ -140,12 +141,11 @@ const ScheduleMaintenance: React.FC<ScheduleMaintenanceProps> = ({
 
       console.log('Maintenance data being sent:', maintenanceData);
 
-      const response = await fetch('http://localhost:8000/api/maintenance/', {
+      const response = await fetch(`${API_BASE_URL}/maintenance/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(maintenanceData)
       });
 

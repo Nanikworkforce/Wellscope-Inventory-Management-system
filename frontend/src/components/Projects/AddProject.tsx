@@ -16,6 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 interface ProjectFormData {
   name: string;
@@ -92,19 +93,18 @@ const AddProject: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [clientsRes, locationsRes, equipmentRes] = await Promise.all([
-          axios.get('http://localhost:8000/api/clients/'),
-          axios.get('http://localhost:8000/api/locations/'),
-          axios.get('http://localhost:8000/api/equipment/'),
+        const [clientsResponse, locationsResponse, equipmentResponse] = await Promise.all([
+          axios.get(`${API_BASE_URL}/clients/`),
+          axios.get(`${API_BASE_URL}/locations/`),
+          axios.get(`${API_BASE_URL}/equipment/`)
         ]);
 
-        setClients(clientsRes.data);
-        setLocations(locationsRes.data);
-        setEquipment(equipmentRes.data);
+        setClients(clientsResponse.data);
+        setLocations(locationsResponse.data);
+        setEquipment(equipmentResponse.data);
         setLoading(false);
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Failed to fetch required data');
+        setError('Failed to load form data');
         setLoading(false);
       }
     };
@@ -125,26 +125,21 @@ const AddProject: React.FC = () => {
     setError(null);
 
     try {
-      const projectResponse = await axios.post('http://localhost:8000/api/projects/', {
+      const projectResponse = await axios.post(`${API_BASE_URL}/projects/`, {
         ...formData,
         client_id: formData.client,
         location_id: formData.location,
         equipment: selectedEquipment.map(eq => eq.id)
       });
 
-      // If we get here, the project was created successfully
       navigate('/projects');
     } catch (err) {
-      console.error('Error creating project:', err);
       if (axios.isAxiosError(err) && err.response) {
         const errorData = err.response.data;
         if (errorData.non_field_errors) {
-          // Show warning about equipment assignment but don't block navigation
           console.warn('Equipment assignment warning:', errorData.non_field_errors);
-          // Still navigate since project was created
           navigate('/projects');
         } else {
-          // Other errors that might prevent project creation
           setError(`Failed to create project: ${JSON.stringify(errorData, null, 2)}`);
         }
       } else {

@@ -14,6 +14,8 @@ import {
   Alert,
 } from '@mui/material';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
+import axios from 'axios';
 
 interface Category {
   id: number;
@@ -48,29 +50,15 @@ const AddEquipment: React.FC = () => {
     const fetchData = async () => {
       try {
         const [categoriesResponse, locationsResponse] = await Promise.all([
-          fetch('http://localhost:8000/api/equipment-categories/'),
-          fetch('http://localhost:8000/api/locations/')
+          axios.get(`${API_BASE_URL}/equipment-categories/`),
+          axios.get(`${API_BASE_URL}/locations/`)
         ]);
 
-        if (!categoriesResponse.ok) {
-          throw new Error(`Failed to fetch categories: ${categoriesResponse.statusText}`);
-        }
-        if (!locationsResponse.ok) {
-          throw new Error(`Failed to fetch locations: ${locationsResponse.statusText}`);
-        }
-
-        const categoriesData = await categoriesResponse.json();
-        const locationsData = await locationsResponse.json();
-
-        console.log('Categories:', categoriesData); // Debug log
-        console.log('Locations:', locationsData); // Debug log
-
-        setCategories(categoriesData);
-        setLocations(locationsData);
+        setCategories(categoriesResponse.data);
+        setLocations(locationsResponse.data);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load form data';
         setError(errorMessage);
-        console.error('Error fetching data:', err);
       }
     };
 
@@ -88,7 +76,6 @@ const AddEquipment: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Format the data to match Django model
       const formattedData = {
         name: formData.name,
         serial_number: formData.serial_number,
@@ -100,28 +87,14 @@ const AddEquipment: React.FC = () => {
         next_maintenance_date: formData.next_maintenance_date || null
       };
 
-      console.log('Sending data:', formattedData); // Debug log
-
-      const response = await fetch('http://localhost:8000/api/equipment/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server error:', errorData); // Debug log
-        throw new Error(errorData.detail || JSON.stringify(errorData));
-      }
-
-      const data = await response.json();
-      console.log('Success:', data); // Debug log
+      await axios.post(`${API_BASE_URL}/equipment/`, formattedData);
       navigate('/equipment');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add equipment');
-      console.error('Error adding equipment:', err);
+      if (axios.isAxiosError(err) && err.response) {
+        setError(JSON.stringify(err.response.data));
+      } else {
+        setError('Failed to add equipment');
+      }
     }
   };
 

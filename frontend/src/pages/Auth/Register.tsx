@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import wsLogo from '../../assets/images/ws1.png';
+import { API_BASE_URL } from '../../config';
 
 interface RegisterFormData {
   first_name: string;
@@ -58,20 +59,30 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/account/register/',
-        formData
+        `${API_BASE_URL}/account/register/`,
+        {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          password: formData.password
+        }
       );
       
       if (response.status === 201) {
         navigate('/login');
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.Error 
-        || err.response?.data?.error
-        || err.response?.data?.message 
-        || err.response?.data?.detail 
-        || 'Registration failed';
-      setError(errorMessage);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        const errorData = err.response.data;
+        const errorMessage = errorData.Error 
+          || errorData.error
+          || errorData.message 
+          || errorData.detail 
+          || 'Registration failed';
+        setError(errorMessage);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
 

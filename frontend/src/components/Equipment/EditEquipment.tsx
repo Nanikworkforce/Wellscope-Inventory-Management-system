@@ -16,6 +16,8 @@ import {
   Stack,
 } from '@mui/material';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
+import axios from 'axios';
 
 interface Category {
   id: number;
@@ -52,49 +54,27 @@ const EditEquipment: React.FC = () => {
     const fetchData = async () => {
       try {
         const [equipmentResponse, categoriesResponse, locationsResponse] = await Promise.all([
-          fetch(`http://localhost:8000/api/equipment/${id}/`),
-          fetch('http://localhost:8000/api/equipment-categories/'),
-          fetch('http://localhost:8000/api/locations/')
+          axios.get(`${API_BASE_URL}/equipment/${id}/`),
+          axios.get(`${API_BASE_URL}/equipment-categories/`),
+          axios.get(`${API_BASE_URL}/locations/`)
         ]);
-
-        if (!equipmentResponse.ok) {
-          throw new Error(`Failed to fetch equipment: ${equipmentResponse.statusText}`);
-        }
-        if (!categoriesResponse.ok) {
-          throw new Error(`Failed to fetch categories: ${categoriesResponse.statusText}`);
-        }
-        if (!locationsResponse.ok) {
-          throw new Error(`Failed to fetch locations: ${locationsResponse.statusText}`);
-        }
-
-        const [equipmentData, categoriesData, locationsData] = await Promise.all([
-          equipmentResponse.json(),
-          categoriesResponse.json(),
-          locationsResponse.json()
-        ]);
-
-        console.log('Equipment:', equipmentData);
-        console.log('Categories:', categoriesData);
-        console.log('Locations:', locationsData);
 
         setFormData({
-          name: equipmentData.name || '',
-          serial_number: equipmentData.serialNumber || '',
-          category: equipmentData.category?.id || '',
-          status: equipmentData.status || '',
-          condition: equipmentData.condition || '',
-          purchase_date: equipmentData.purchase_date || '',
-          current_location: equipmentData.current_location || '',
-          next_maintenance_date: equipmentData.next_maintenance_date || '',
+          name: equipmentResponse.data.name || '',
+          serial_number: equipmentResponse.data.serial_number || '',
+          category: equipmentResponse.data.category?.id || '',
+          status: equipmentResponse.data.status || '',
+          condition: equipmentResponse.data.condition || '',
+          purchase_date: equipmentResponse.data.purchase_date || '',
+          current_location: equipmentResponse.data.current_location || '',
+          next_maintenance_date: equipmentResponse.data.next_maintenance_date || '',
         });
 
-        setCategories(categoriesData);
-        setLocations(locationsData);
+        setCategories(categoriesResponse.data);
+        setLocations(locationsResponse.data);
         setLoading(false);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
-        setError(errorMessage);
-        console.error('Error fetching data:', err);
+        setError('Failed to load data');
         setLoading(false);
       }
     };
@@ -124,28 +104,14 @@ const EditEquipment: React.FC = () => {
         next_maintenance_date: formData.next_maintenance_date || null
       };
 
-      console.log('Sending data:', formattedData);
-
-      const response = await fetch(`http://localhost:8000/api/equipment/${id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formattedData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Server error:', errorData);
-        throw new Error(errorData.detail || JSON.stringify(errorData));
-      }
-
-      const data = await response.json();
-      console.log('Success:', data);
+      await axios.put(`${API_BASE_URL}/equipment/${id}/`, formattedData);
       navigate('/equipment');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update equipment');
-      console.error('Error updating equipment:', err);
+      if (axios.isAxiosError(err) && err.response) {
+        setError(JSON.stringify(err.response.data));
+      } else {
+        setError('Failed to update equipment');
+      }
     }
   };
 

@@ -32,6 +32,8 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
+import axios from 'axios';
 
 interface FinancialData {
   equipment: {
@@ -62,53 +64,22 @@ const FinancialReports: React.FC = () => {
     monthlyExpenses: [],
     expenseDistribution: [],
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [timeRange, setTimeRange] = useState<'month' | 'quarter' | 'year'>('month');
 
   useEffect(() => {
-    // TODO: Replace with actual API call
     const fetchFinancialData = async () => {
-      const mockData: FinancialData = {
-        equipment: [
-          {
-            id: 'DR001',
-            name: 'Drilling Rig A',
-            purchaseValue: 1000000,
-            currentValue: 850000,
-            depreciationRate: 0.1,
-            maintenanceCosts: 40000,
-            operatingCosts: 120000,
-            monthlyDepreciation: [
-              { month: 'Jan', value: 1000000 },
-              { month: 'Feb', value: 975000 },
-              { month: 'Mar', value: 950000 },
-              { month: 'Apr', value: 925000 },
-              { month: 'May', value: 900000 },
-              { month: 'Jun', value: 875000 },
-              { month: 'Jul', value: 850000 },
-            ],
-          },
-          // Add more equipment...
-        ],
-        totalAssets: 2500000,
-        totalDepreciation: 350000,
-        totalMaintenance: 85000,
-        totalOperating: 280000,
-        monthlyExpenses: [
-          { month: 'Jan', maintenance: 12000, operating: 40000, depreciation: 25000 },
-          { month: 'Feb', maintenance: 8000, operating: 38000, depreciation: 25000 },
-          { month: 'Mar', maintenance: 15000, operating: 42000, depreciation: 25000 },
-          { month: 'Apr', maintenance: 9000, operating: 39000, depreciation: 25000 },
-          { month: 'May', maintenance: 18000, operating: 41000, depreciation: 25000 },
-          { month: 'Jun', maintenance: 11000, operating: 40000, depreciation: 25000 },
-        ],
-        expenseDistribution: [
-          { category: 'Depreciation', value: 350000 },
-          { category: 'Maintenance', value: 85000 },
-          { category: 'Operating', value: 280000 },
-        ],
-      };
-      setFinancialData(mockData);
+      try {
+        const response = await axios.get(`${API_BASE_URL}/finance/reports/`);
+        setFinancialData(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch financial data');
+        setLoading(false);
+        console.error('Error fetching financial data:', err);
+      }
     };
 
     fetchFinancialData();
@@ -160,7 +131,32 @@ const FinancialReports: React.FC = () => {
     },
   ];
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/finance/reports/pdf/`, {
+        responseType: 'blob'
+      });
+      
+      // Create a blob from the PDF Stream
+      const file = new Blob([response.data], { type: 'application/pdf' });
+      
+      // Create a link element and trigger download
+      const fileURL = URL.createObjectURL(file);
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.download = `financial-report-${new Date().toISOString().split('T')[0]}.pdf`;
+      link.click();
+      
+      // Clean up
+      URL.revokeObjectURL(fileURL);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      // Fallback to client-side PDF generation if API fails
+      generateClientPDF();
+    }
+  };
+
+  const generateClientPDF = () => {
     const doc = new jsPDF();
     
     // Add title

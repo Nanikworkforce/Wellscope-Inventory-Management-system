@@ -11,6 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 interface CustomerFormData {
   company_name: string;
@@ -42,7 +43,7 @@ const AddCustomer: React.FC = () => {
     setError(null);
 
     try {
-      await axios.post('http://localhost:8000/api/clients/', formData);
+      await axios.post(`${API_BASE_URL}/clients/`, formData);
       navigate('/customers');
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {

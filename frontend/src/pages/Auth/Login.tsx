@@ -18,13 +18,19 @@ import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import nanikLogo from '../../assets/images/nanik.jpg';
 import wsLogo from '../../assets/images/ws1.png';
+import { API_BASE_URL } from '../../config';
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
 
 const Login = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
@@ -42,20 +48,27 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:8000/account/login/',
+        `${API_BASE_URL}/account/login/`,
         formData
       );
       
       if (response.data.token) {
         localStorage.setItem('token', response.data.token.access);
+        // Set the default Authorization header for all future requests
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         navigate('/dashboard');
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.error 
-        || err.response?.data?.message 
-        || err.response?.data?.detail 
-        || 'Login failed';
-      setError(errorMessage);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        const errorData = err.response.data;
+        const errorMessage = errorData.error 
+          || errorData.message 
+          || errorData.detail 
+          || 'Login failed';
+        setError(errorMessage);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     }
   };
 

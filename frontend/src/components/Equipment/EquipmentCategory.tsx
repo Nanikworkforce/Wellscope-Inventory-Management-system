@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import bgImage from '../../assets/images/bg.jpg';
+import { API_BASE_URL } from '../../config';
 
 interface Category {
   id: number;
@@ -57,11 +58,10 @@ const EquipmentCategory: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/equipment-categories/');
+      const response = await axios.get(`${API_BASE_URL}/equipment-categories/`);
       setCategories(response.data);
     } catch (err) {
       setError('Failed to fetch categories');
-      console.error('Error fetching categories:', err);
     }
   };
 
@@ -94,26 +94,24 @@ const EquipmentCategory: React.FC = () => {
     e.preventDefault();
     try {
       if (editingCategory) {
-        await axios.put(`http://localhost:8000/api/equipment-categories/${editingCategory.id}/`, formData);
+        await axios.put(`${API_BASE_URL}/equipment-categories/${editingCategory.id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/equipment-categories/', formData);
+        await axios.post(`${API_BASE_URL}/equipment-categories/`, formData);
       }
       fetchCategories();
       handleClose();
     } catch (err) {
       setError('Failed to save category');
-      console.error('Error saving category:', err);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/equipment-categories/${id}/`);
+        await axios.delete(`${API_BASE_URL}/equipment-categories/${id}/`);
         fetchCategories();
       } catch (err) {
         setError('Failed to delete category');
-        console.error('Error deleting category:', err);
       }
     }
   };
