@@ -52,42 +52,30 @@ const Login = () => {
         formData
       );
       
-      // Debug: Log the response structure
-      console.log('Login response:', response.data);
+      // Get the token from the response
+      const accessToken = response.data.token?.access || response.data.access;
+      const refreshToken = response.data.token?.refresh || response.data.refresh;
 
-      // Check for token in different possible response structures
-      const accessToken = response.data.access || response.data.token?.access || response.data.token;
-      
       if (accessToken) {
-        // Store the tokens
-        localStorage.setItem('accessToken', accessToken);
-        
-        // Store refresh token if it exists
-        if (response.data.refresh || response.data.token?.refresh) {
-          localStorage.setItem('refreshToken', response.data.refresh || response.data.token.refresh);
+        // Store tokens in localStorage
+        localStorage.setItem('token', accessToken);
+        if (refreshToken) {
+          localStorage.setItem('refreshToken', refreshToken);
         }
-        
-        // Set the default Authorization header for all future requests
+
+        // Set axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-        
+
         // Navigate to dashboard
-        navigate('/dashboard', { replace: true });
+        navigate('/dashboard');
       } else {
-        console.error('No access token found in response:', response.data);
-        setError('Invalid response from server: No access token found');
+        setError('No access token received');
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        const errorData = err.response.data;
-        const errorMessage = errorData.error 
-          || errorData.message 
-          || errorData.detail 
-          || 'Login failed';
-        setError(errorMessage);
-        console.error('Login error:', errorData);
+        setError(err.response.data.detail || 'Login failed');
       } else {
         setError('Login failed. Please try again.');
-        console.error('Login error:', err);
       }
     }
   };

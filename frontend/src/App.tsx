@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/Layout/Layout.tsx';
 import EquipmentList from './components/Equipment/EquipmentList.tsx';
@@ -36,30 +36,61 @@ const theme = createTheme({
 });
 
 const App = () => {
-  // Check if user is authenticated
-  const isAuthenticated = !!localStorage.getItem('token');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <Routes>
-          {/* Redirect root to register page */}
-          <Route path="/" element={<Navigate to="/register" replace />} />
-          
           {/* Public routes */}
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          
-          {/* Protected routes - All wrapped in Layout */}
-          <Route element={
-            isAuthenticated ? (
-              <Layout>
-                <Outlet />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }>
+          <Route 
+            path="/" 
+            element={
+              isAuthenticated ? 
+                <Navigate to="/dashboard" replace /> : 
+                <Navigate to="/login" replace />
+            } 
+          />
+          <Route 
+            path="/login" 
+            element={
+              isAuthenticated ? 
+                <Navigate to="/dashboard" replace /> : 
+                <Login />
+            } 
+          />
+          <Route 
+            path="/register" 
+            element={
+              isAuthenticated ? 
+                <Navigate to="/dashboard" replace /> : 
+                <Register />
+            } 
+          />
+
+          {/* Protected routes */}
+          <Route 
+            element={
+              isAuthenticated ? (
+                <Layout>
+                  <Outlet />
+                </Layout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          >
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/equipment" element={<EquipmentList />} />
             <Route path="/customers" element={<CustomerList />} />
@@ -81,14 +112,12 @@ const App = () => {
             <Route path="/profile" element={<Profile />} />
           </Route>
 
-          {/* Default redirect */}
-          <Route path="/" element={
-            <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
-          } />
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
   );
-}
+};
 
 export default App;
