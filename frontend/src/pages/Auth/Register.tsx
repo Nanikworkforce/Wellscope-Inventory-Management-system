@@ -17,7 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import wsLogo from '../../assets/images/ws1.png';
-import { API_BASE_URL } from '../../config.ts';
+import { AUTH_BASE_URL } from '../../config.ts';
 
 interface RegisterFormData {
   first_name: string;
@@ -59,7 +59,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/account/register/`,
+        `${AUTH_BASE_URL}/account/register/`,
         {
           first_name: formData.first_name,
           last_name: formData.last_name,
