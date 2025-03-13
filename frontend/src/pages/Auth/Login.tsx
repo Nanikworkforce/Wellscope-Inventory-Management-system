@@ -48,7 +48,7 @@ const Login = () => {
 
     try {
       const response = await axios.post(
-        `${AUTH_BASE_URL}/account/login/`,
+        `${AUTH_BASE_URL}/login/`,
         formData
       );
       
