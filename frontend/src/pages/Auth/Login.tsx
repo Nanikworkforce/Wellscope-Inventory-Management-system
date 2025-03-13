@@ -13,10 +13,8 @@ import {
   useTheme,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
-import nanikLogo from '../../assets/images/nanik.jpg';
 import wsLogo from '../../assets/images/ws1.png';
 import { AUTH_BASE_URL } from '../../config.ts';
 
@@ -26,7 +24,6 @@ interface LoginFormData {
 }
 
 const Login = () => {
-  const navigate = useNavigate();
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -51,23 +48,20 @@ const Login = () => {
         `${AUTH_BASE_URL}/login/`,
         formData
       );
-      
-      // Get the token from the response
+
       const accessToken = response.data.token?.access || response.data.access;
       const refreshToken = response.data.token?.refresh || response.data.refresh;
 
       if (accessToken) {
-        // Store tokens in localStorage
         localStorage.setItem('token', accessToken);
         if (refreshToken) {
           localStorage.setItem('refreshToken', refreshToken);
         }
 
-        // Set axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-        // Navigate to dashboard
-        navigate('/dashboard');
+        // ✅ BEST FIX: redirect works on mobile & all browsers
+        window.location.href = '/dashboard';
       } else {
         setError('No access token received');
       }
@@ -81,7 +75,7 @@ const Login = () => {
   };
 
   return (
-    <Box sx={{ 
+    <Box sx={{
       minHeight: '100vh',
       bgcolor: '#1a1f2e',
       color: 'white',
@@ -108,25 +102,24 @@ const Login = () => {
         background: 'linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0.1))',
         zIndex: 1
       }} />
-      
-      <Container maxWidth="md" sx={{ 
-        position: 'relative', 
+
+      <Container maxWidth="md" sx={{
+        position: 'relative',
         zIndex: 2,
         px: { xs: 3, sm: 5, md: 8 },
       }}>
-        <Box sx={{ 
-          pt: 4, 
+        <Box sx={{
+          pt: 4,
           pb: 8,
           maxWidth: '600px',
-          mx: 'auto' 
+          mx: 'auto'
         }}>
-          {/* Logo and Nav */}
           <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 6 }}>
             <Box
               component="img"
               src={wsLogo}
               alt="Logo"
-              sx={{ 
+              sx={{
                 width: 160,
                 height: 64,
                 borderRadius: '8px',
@@ -134,9 +127,9 @@ const Login = () => {
               }}
             />
             <Box sx={{ flexGrow: 1 }} />
-            <Button 
-              color="inherit" 
-              sx={{ 
+            <Button
+              color="inherit"
+              sx={{
                 mr: 2,
                 '&:hover': {
                   color: '#F97316'
@@ -145,9 +138,9 @@ const Login = () => {
             >
               Sign Up
             </Button>
-            <Button 
+            <Button
               color="inherit"
-              sx={{ 
+              sx={{
                 '&:hover': {
                   color: '#F97316'
                 }
@@ -157,23 +150,22 @@ const Login = () => {
             </Button>
           </Stack>
 
-          {/* Main Content */}
           <Box sx={{ mb: 4 }}>
-            <Typography 
-              variant="body1" 
-              sx={{ 
+            <Typography
+              variant="body1"
+              sx={{
                 color: '#F97316',
                 mb: 2,
                 letterSpacing: 1,
-                fontWeight: 600  // Added bold font weight
+                fontWeight: 600
               }}
             >
               WELCOME BACK
             </Typography>
-            
-            <Typography 
-              variant="h3" 
-              sx={{ 
+
+            <Typography
+              variant="h3"
+              sx={{
                 fontWeight: 'bold',
                 mb: 2
               }}
@@ -181,15 +173,15 @@ const Login = () => {
               Login to your account<span style={{ color: '#F97316' }}>.</span>
             </Typography>
 
-            <Typography 
-              variant="body1" 
+            <Typography
+              variant="body1"
               sx={{ color: '#9ba1a6' }}
             >
-              Don't have an account? <Link 
-                href="/register" 
-                sx={{ 
+              Don't have an account? <Link
+                href="/register"
+                sx={{
                   color: '#F97316',
-                  fontWeight: 600  // Added bold font weight
+                  fontWeight: 600
                 }}
               >
                 Sign Up
@@ -218,7 +210,7 @@ const Login = () => {
                     bgcolor: '#262b38',
                     color: 'white',
                     borderRadius: '8px',
-                    '& fieldset': { 
+                    '& fieldset': {
                       borderColor: '#373c4a',
                       borderRadius: '8px',
                     },
@@ -240,7 +232,7 @@ const Login = () => {
                     bgcolor: '#262b38',
                     color: 'white',
                     borderRadius: '8px',
-                    '& fieldset': { 
+                    '& fieldset': {
                       borderColor: '#373c4a',
                       borderRadius: '8px',
                     },
@@ -304,4 +296,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;
