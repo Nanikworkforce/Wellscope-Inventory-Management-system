@@ -53,6 +53,7 @@ const Login = () => {
       );
       
       if (response.data.access) {
+        console.log("Login API response:", response.data);
         localStorage.setItem('accessToken', response.data.access);
         localStorage.setItem('refreshToken', response.data.refresh);
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
