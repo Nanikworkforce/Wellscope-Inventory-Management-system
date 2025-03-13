@@ -18,15 +18,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        # Print the data to debug
-        print("Validated data:", validated_data)
         validated_data.pop("confirm_password")
+        # Auto-generate username from email
+        validated_data["username"] = validated_data["email"].split('@')[0]
+
         try:
             user = User.objects.create_user(**validated_data)
             return user
         except Exception as e:
             print("Error creating user:", str(e))
             raise
+
 
 
 class UserLoginSerializer(serializers.Serializer):
