@@ -19,7 +19,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop("confirm_password")
-        # Auto-generate username from email
         validated_data["username"] = validated_data["email"].split('@')[0]
 
         try:
