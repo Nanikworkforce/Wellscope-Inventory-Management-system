@@ -52,11 +52,14 @@ const Login = () => {
         formData
       );
       
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token.access);
-        // Set the default Authorization header for all future requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
-        navigate('/dashboard');
+      if (response.data.access) {
+        localStorage.setItem('accessToken', response.data.access);
+        localStorage.setItem('refreshToken', response.data.refresh);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.access}`;
+        navigate('/dashboard', { replace: true });
+        console.log('Login successful, redirecting to dashboard...');
+      } else {
+        setError('Invalid response from server');
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
