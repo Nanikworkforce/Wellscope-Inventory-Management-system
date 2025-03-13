@@ -59,7 +59,7 @@ const Register = () => {
 
     try {
       const response = await axios.post(
-        `${AUTH_BASE_URL}/account/register/`,
+        `${AUTH_BASE_URL}/register/`,
         {
           first_name: formData.first_name,
           last_name: formData.last_name,
