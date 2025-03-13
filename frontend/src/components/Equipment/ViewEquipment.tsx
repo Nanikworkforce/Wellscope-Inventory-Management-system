@@ -28,7 +28,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Equipment } from '../../types';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 const ViewEquipment: React.FC = () => {
   const navigate = useNavigate();

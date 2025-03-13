@@ -27,6 +27,8 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config.ts';
+
 
 interface Project {
   id: number;
@@ -64,7 +66,7 @@ const ViewProject: React.FC = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/projects/${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/projects/${id}/`);
         setProject(response.data);
         setLoading(false);
       } catch (err) {
@@ -143,7 +145,7 @@ const ViewProject: React.FC = () => {
               color="error"
               onClick={() => {
                 if (window.confirm('Are you sure you want to delete this project?')) {
-                  axios.delete(`http://localhost:8000/api/projects/${id}/`)
+                  axios.delete(`${API_BASE_URL}projects/${id}/`)
                     .then(() => navigate('/projects'))
                     .catch(() => setError('Failed to delete project'));
                 }

@@ -16,7 +16,7 @@ import {
   Stack,
 } from '@mui/material';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 import axios from 'axios';
 
 interface Category {

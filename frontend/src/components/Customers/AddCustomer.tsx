@@ -11,7 +11,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface CustomerFormData {
   company_name: string;

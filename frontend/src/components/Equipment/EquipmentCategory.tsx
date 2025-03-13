@@ -36,7 +36,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface Category {
   id: number;

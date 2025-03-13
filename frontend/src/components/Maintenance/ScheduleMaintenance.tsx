@@ -28,7 +28,7 @@ import {
   PriorityHigh,
   Engineering,
 } from '@mui/icons-material';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface Equipment {
   id: string;

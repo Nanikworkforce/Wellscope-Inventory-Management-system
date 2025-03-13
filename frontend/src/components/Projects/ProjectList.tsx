@@ -35,7 +35,7 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface Project {
   id: number;

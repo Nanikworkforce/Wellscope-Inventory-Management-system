@@ -32,7 +32,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import bgImage from '../../assets/images/bg.jpg';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 import axios from 'axios';
 
 interface FinancialData {

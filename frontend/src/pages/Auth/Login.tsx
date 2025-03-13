@@ -18,7 +18,7 @@ import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import nanikLogo from '../../assets/images/nanik.jpg';
 import wsLogo from '../../assets/images/ws1.png';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface LoginFormData {
   email: string;

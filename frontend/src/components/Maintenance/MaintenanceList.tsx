@@ -42,7 +42,7 @@ import { Equipment } from '../../types';
 import bgImage from '../../assets/images/bg.jpg';
 import ScheduleMaintenance from './ScheduleMaintenance.tsx';
 import EditMaintenance from './EditMaintenance.tsx';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface MaintenanceRecord {
   id: string;

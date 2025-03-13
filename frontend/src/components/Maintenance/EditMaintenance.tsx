@@ -6,7 +6,7 @@ import {
 import { MaintenanceRecord } from '../../types';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { API_BASE_URL } from '../../config';
+import { API_BASE_URL } from '../../config.ts';
 
 interface EditMaintenanceProps {
   record: MaintenanceRecord | null;
