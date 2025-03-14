@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import axios from 'axios';
-import { AUTH_BASE_URL } from '../../config';
+import { AUTH_BASE_URL } from '../../config.ts';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
