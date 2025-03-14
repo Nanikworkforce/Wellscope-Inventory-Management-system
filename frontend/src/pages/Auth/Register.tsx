@@ -32,6 +32,7 @@ const Register = () => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState<RegisterFormData>({
     first_name: '',
     last_name: '',
@@ -60,17 +61,14 @@ const Register = () => {
     try {
       const response = await axios.post(
         `${AUTH_BASE_URL}/register/`,
-        {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          email: formData.email,
-          password: formData.password,
-          confirm_password: formData.confirm_password
-        }
+        formData
       );
       
       if (response.status === 201) {
-        navigate('/login');
+        setSuccess('Registration successful! Please check your email to verify your account.');
+        setTimeout(() => {
+          navigate('/login');
+        }, 5000);
       }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
@@ -209,6 +207,12 @@ const Register = () => {
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
             </Alert>
           )}
 

@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-^&9tb()frto^8c(tk__kvc%-gj8tsjn!6k(lw22qv9=*hq9j)a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -167,6 +167,20 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+# Site URL for verification links
+SITE_URL = "https://nanik-ims.vercel.app"  # your deployed frontend URL
+
+# Email settings
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "your-email@gmail.com"  # your email
+EMAIL_HOST_PASSWORD = "your-app-password"  # your app password from Google
+
+# Site URL for verification links
+SITE_URL = "http://localhost:3000"

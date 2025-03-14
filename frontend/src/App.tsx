@@ -23,6 +23,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import EquipmentCategory from './components/Equipment/EquipmentCategory.tsx';
 import UseLogs from './components/Equipment/UseLogs.tsx';
 import Profile from './components/Profile/Profile.tsx';
+import VerifyEmail from './pages/Auth/VerifyEmail.tsx';
 
 const theme = createTheme({
   palette: {
@@ -114,6 +115,7 @@ const App = () => {
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

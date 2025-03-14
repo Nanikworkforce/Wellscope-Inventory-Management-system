@@ -5,6 +5,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
 from django.contrib.sites.shortcuts import get_current_site
+from django.conf import settings
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from django.utils.translation import gettext_lazy as _
 from rest_framework import viewsets, status, views, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,6 +18,13 @@ from rest_framework.decorators import action
 from django.utils.translation import gettext_lazy as _
 from .serializer import *
 from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import Util, user_email, generate_six_digit_code, send_reset_code
+from datetime import datetime, timedelta
+import jwt
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+
 
 # Create your views here.
 User = get_user_model()
@@ -35,16 +46,17 @@ class UserRegistrationViewset(viewsets.ViewSet):
 
             if not all([email, password, confirm_password]):
                 return Response(
-                    {"Error: All Inputs Should Be Provided"},
+                    {"Error": _("All inputs must be provided")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             if User.objects.filter(email=email).exists():
                 return Response(
-                    {"Error: Email already exists"}, status=status.HTTP_400_BAD_REQUEST
+                    {"Error": _("Email Already exists")},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
             if password != confirm_password:
                 return Response(
-                    {"Error: Passwords do not match"},
+                    {"Error": _("Password Fields Do not match")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -54,14 +66,20 @@ class UserRegistrationViewset(viewsets.ViewSet):
                     password=password,
                     first_name=first_name,
                     last_name=last_name,
+                    is_active=False,  # Set user as inactive until email verification
                 )
                 user.save()
+                user_email(request, user)  # Send verification email
                 return Response(
-                    {"Account Created Successfully"}, status=status.HTTP_201_CREATED
+                    {
+                        "message": "Registration successful. Please check your email to verify your account.",
+                        "email": user.email,
+                    },
+                    status=status.HTTP_201_CREATED,
                 )
             else:
                 return Response(
-                    {"Error: Email and Password Should be Provided"},
+                    {"Error": _("Password and Email should be Provided")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         except Exception as e:
@@ -90,9 +108,13 @@ class LoginViewset(viewsets.ViewSet):
             user = authenticate(request, email=email, password=password)
 
             if user:
+                if not user.is_verified:
+                    return Response(
+                        {"error": "Please verify your email before logging in"},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
                 if user.is_active:
                     login(request, user)
-                    # Generate JWT tokens
                     refresh = RefreshToken.for_user(user)
                     return Response(
                         {
@@ -125,3 +147,53 @@ class LoginViewset(viewsets.ViewSet):
     def logout(self, request):
         logout(request)
         return Response({"Logout Successful"}, status=status.HTTP_200_OK)
+
+
+class VerifyEmailViewSet(viewsets.GenericViewSet):
+    serializer_class = VerifyEmailSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                "token",
+                openapi.IN_QUERY,
+                description="The token for email verification",
+                type=openapi.TYPE_STRING,
+            )
+        ]
+    )
+    @action(
+        methods=["get"],
+        detail=False,
+    )
+    def verify(self, request):
+        token = request.GET.get("token")
+
+        try:
+            email_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            user = User.objects.get(id=email_token["user_id"])
+            if not user.is_verified:
+                user.is_verified = True
+                user.save()
+            return Response(
+                {"email": "User is Successfully activated"}, status=status.HTTP_200_OK
+            )
+        except jwt.ExpiredSignatureError as e:
+            return Response(
+                {"Error": f"Email Activation Expired : {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except jwt.exceptions.DecodeError as e:
+            return Response(
+                {"Error": f"Invalid Token : {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    def generate_token(user):
+        expiration = datetime.utcnow() + timedelta(
+            hours=24
+        )  # Adjust the expiration time as needed
+        payload = {"user_id": user.id, "exp": expiration, "iat": datetime.utcnow()}
+        token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+        return token
