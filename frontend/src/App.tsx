@@ -24,6 +24,8 @@ import EquipmentCategory from './components/Equipment/EquipmentCategory.tsx';
 import UseLogs from './components/Equipment/UseLogs.tsx';
 import Profile from './components/Profile/Profile.tsx';
 import VerifyEmail from './pages/Auth/VerifyEmail.tsx';
+import { isAuthenticated } from './utils/authGuard.ts';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const theme = createTheme({
   palette: {
@@ -57,38 +59,26 @@ const App = () => {
           {/* Public routes */}
           <Route 
             path="/" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Navigate to="/login" replace />
-            } 
+            element={isAuthenticated() ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/login" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Login />
-            } 
+            element={isAuthenticated() ? <Navigate to="/dashboard" /> : <Login />} 
           />
           <Route 
             path="/register" 
-            element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Register />
-            } 
+            element={isAuthenticated() ? <Navigate to="/dashboard" /> : <Register />} 
           />
 
           {/* Protected routes */}
           <Route 
             element={
-              isAuthenticated ? (
+              isAuthenticated() ? (
                 <Layout>
                   <Outlet />
                 </Layout>
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to="/login" />
               )
             }
           >
@@ -114,7 +104,7 @@ const App = () => {
           </Route>
 
           {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </BrowserRouter>
