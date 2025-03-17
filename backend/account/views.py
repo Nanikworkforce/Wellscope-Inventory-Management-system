@@ -37,11 +37,13 @@ class UserRegistrationViewset(viewsets.ViewSet):
     @action(detail=False,methods=['post'],permission_classes=[AllowAny])
     def register(self,request):
         try:
+            first_name       = request.data.get('first_name')
+            last_name        = request.data.get('last_name')
             email            = request.data.get('email')
             password         = request.data.get('password','').strip()
             password_confirm = request.data.get('password_confirm','').strip()
 
-            if not all([email,password,password_confirm]):
+            if not all([email,password,password_confirm,first_name,last_name]):
                 return Response({'Error':_('All inputs must be provided')},status=status.HTTP_400_BAD_REQUEST)
             if User.objects.filter(email=email).exists():
                 return Response({'Error':_('Email Already exists')},status=status.HTTP_400_BAD_REQUEST)
@@ -51,7 +53,9 @@ class UserRegistrationViewset(viewsets.ViewSet):
             if email and password:
                 user=User.objects.create_user(
                     email=email,
-                    password=password
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name
                 )
                 user.save()
                 user_email(request,user)
