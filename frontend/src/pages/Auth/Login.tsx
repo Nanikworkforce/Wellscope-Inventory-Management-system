@@ -43,20 +43,24 @@ const Login = () => {
     e.preventDefault();
     setError('');
 
-    const loginData = {
-      email: formData.email.toLowerCase().trim(),
-      password: formData.password
-    };
-
     try {
+      // Correct URL format
+      const loginUrl = `${AUTH_BASE_URL}/login/`;
+      
       console.log('Login attempt:', {
-        url: `${AUTH_BASE_URL}/login/`,
-        data: loginData
+        url: loginUrl,
+        data: {
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password
+        }
       });
 
       const response = await axios.post(
-        `${AUTH_BASE_URL}/login/`,
-        loginData,
+        loginUrl,
+        {
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password
+        },
         {
           headers: {
             'Content-Type': 'application/json',
@@ -75,12 +79,16 @@ const Login = () => {
         // Set default Authorization header for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         
-        console.log('Login successful, redirecting to dashboard...');
+        console.log('Login successful, tokens stored');
+        
+        // Check if tokens were properly stored
+        const storedAccessToken = localStorage.getItem('accessToken');
+        console.log('Stored access token:', storedAccessToken ? 'Present' : 'Missing');
         
         // Use React Router for navigation if available
-        if (window.location.href.includes('vercel.app')) {
-          window.location.href = '/dashboard';
-        } else {
+        if (window.location.pathname !== '/dashboard') {
+          console.log('Redirecting to dashboard...');
+          // Force a hard navigation to ensure everything is reloaded
           window.location.href = '/dashboard';
         }
       } else {
