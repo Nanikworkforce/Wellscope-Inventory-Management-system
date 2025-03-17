@@ -100,7 +100,7 @@ class LoginViewset(viewsets.ViewSet):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def login(self, request):
         try:
             email = request.data.get("email")
