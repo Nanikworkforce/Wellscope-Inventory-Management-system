@@ -44,24 +44,26 @@ const Login = () => {
     setError('');
 
     try {
-      console.log('Attempting login...'); // Debug log
+      console.log('Login payload:', formData); // Debug log
       const response = await axios.post(
-        `${AUTH_BASE_URL}/login/`,  // Updated to match backend URL pattern
-        formData
+        `${AUTH_BASE_URL}/login/`,  // Updated URL - removed duplicate 'login'
+        {
+          email: formData.email,
+          password: formData.password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
       
       console.log('Login response:', response.data); // Debug log
 
-      const accessToken = response.data.token?.access || response.data.access;
-      const refreshToken = response.data.token?.refresh || response.data.refresh;
-
-      if (accessToken) {
-        localStorage.setItem('token', accessToken);
-        if (refreshToken) {
-          localStorage.setItem('refreshToken', refreshToken);
-        }
-
-        axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      if (response.data.token?.access) {
+        localStorage.setItem('accessToken', response.data.token.access);
+        localStorage.setItem('refreshToken', response.data.token.refresh);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         window.location.href = '/dashboard';
       } else {
         console.error('No access token in response:', response.data);
@@ -70,8 +72,9 @@ const Login = () => {
     } catch (error) {
       console.error('Login error:', error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = error.response.data.detail || 
-                            error.response.data.error || 
+        console.error('Error response:', error.response.data);
+        const errorMessage = error.response.data.error || 
+                            error.response.data.detail || 
                             'Login failed';
         setError(errorMessage);
       } else {
