@@ -29,7 +29,7 @@ def user_email(request, user):
         algorithm="HS256",
     )
 
-    absurl = f"{settings.SITE_URL}/verify-email?token={token}"
+    absurl = f"{settings.SITE_URL}/account/verify/verify/?token={token}"
     email_body = f"""
     Hi {user.email},
     

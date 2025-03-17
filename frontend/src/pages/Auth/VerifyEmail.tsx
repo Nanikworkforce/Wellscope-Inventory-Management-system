@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config.ts';
+import { AUTH_BASE_URL } from '../../config.ts';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -21,7 +21,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const verifyUrl = `${API_BASE_URL}/verify/verify/?token=${token}`;
+        const verifyUrl = `${AUTH_BASE_URL}/verify/verify/?token=${token}`;
         console.log('Verification URL:', verifyUrl);
         
         const response = await axios.get(verifyUrl);
