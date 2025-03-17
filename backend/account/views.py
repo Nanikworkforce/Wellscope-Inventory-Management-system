@@ -38,41 +38,40 @@ class UserRegistrationViewset(viewsets.ViewSet):
     @method_decorator(csrf_exempt)
     def register(self, request):
         try:
-            first_name = request.data.get("first_name")
-            last_name = request.data.get("last_name")
-            email = request.data.get("email", "").lower().strip()  # Normalize email
-            password = request.data.get("password")
-            confirm_password = request.data.get("confirm_password")
+            data = request.data
+            print(f"Registration data received: {data}")  # Debug log
 
-            print(f"Registration attempt for email: {email}")  # Debug log
+            email = data.get("email", "").lower().strip()
+            password = data.get("password")
+            confirm_password = data.get("confirm_password")
+            first_name = data.get("first_name", "")
+            last_name = data.get("last_name", "")
 
-            if not all([email, password, confirm_password]):
+            # Validation
+            if not email or not password or not confirm_password:
                 return Response(
-                    {"Error": _("All inputs must be provided")},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            # Check if user exists - with debug logging
-            existing_user = User.objects.filter(email=email).first()
-            if existing_user:
-                print(f"Existing user found: {email}")
-                print(
-                    f"Status - Active: {existing_user.is_active}, Verified: {existing_user.is_verified}"
-                )
-                return Response(
-                    {"Error": _("Email Already exists")},
+                    {"Error": "Email, password and confirm password are required"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             if password != confirm_password:
                 return Response(
-                    {"Error": _("Password Fields Do not match")},
+                    {"Error": "Passwords do not match"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Check if user exists
+            if User.objects.filter(email=email).exists():
+                print(f"User already exists with email: {email}")
+                return Response(
+                    {"Error": "Email already exists"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
             try:
-                # Create user with debug logging
-                print(f"Creating new user: {email}")
+                # Create user
+                print(f"Creating user with email: {email}")
+                User = get_user_model()
                 user = User.objects.create_user(
                     email=email,
                     password=password,
@@ -82,37 +81,40 @@ class UserRegistrationViewset(viewsets.ViewSet):
                     is_verified=False,
                 )
 
-                # Explicitly commit to database
-                user.save()
-
-                # Verify user was saved
-                saved_user = User.objects.get(email=email)
+                # Verify user was created
+                print(f"Checking if user was created...")
+                created_user = User.objects.get(email=email)
                 print(
                     f"""
                 User created successfully:
-                - Email: {saved_user.email}
-                - ID: {saved_user.id}
-                - Active: {saved_user.is_active}
-                - Verified: {saved_user.is_verified}
-                - Has password: {saved_user.has_usable_password()}
+                - ID: {created_user.id}
+                - Email: {created_user.email}
+                - Active: {created_user.is_active}
+                - Verified: {created_user.is_verified}
+                - Password set: {created_user.has_usable_password()}
                 """
                 )
 
                 # Send verification email
-                user_email(request, saved_user)
+                print(f"Sending verification email...")
+                user_email(request, created_user)
                 print(f"Verification email sent to: {email}")
 
                 return Response(
                     {
-                        "message": "Registration successful. Please check your email to verify your account.",
-                        "email": user.email,
-                        "user_id": user.id,
+                        "message": "Registration successful! Please check your email to verify your account.",
+                        "email": email,
+                        "user_id": created_user.id,
                     },
                     status=status.HTTP_201_CREATED,
                 )
+
             except Exception as e:
-                print(f"Error creating user: {str(e)}")
-                raise
+                print(f"Error during user creation: {str(e)}")
+                return Response(
+                    {"error": f"Failed to create user: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
         except Exception as e:
             print(f"Registration error: {str(e)}")
