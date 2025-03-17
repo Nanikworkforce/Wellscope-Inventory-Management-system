@@ -44,11 +44,11 @@ const Login = () => {
     setError('');
 
     try {
-      console.log('Login payload:', formData); // Debug log
+      console.log('Login payload:', formData);
       const response = await axios.post(
-        `${AUTH_BASE_URL}/login/`,  // Updated URL - removed duplicate 'login'
+        `${AUTH_BASE_URL}/login/`,  // Updated to match backend URL pattern
         {
-          email: formData.email,
+          email: formData.email.toLowerCase().trim(),  // Normalize email
           password: formData.password
         },
         {
@@ -58,7 +58,7 @@ const Login = () => {
         }
       );
       
-      console.log('Login response:', response.data); // Debug log
+      console.log('Login response:', response.data);
 
       if (response.data.token?.access) {
         localStorage.setItem('accessToken', response.data.token.access);
@@ -71,12 +71,17 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error('Error response:', error.response.data);
-        const errorMessage = error.response.data.error || 
-                            error.response.data.detail || 
-                            'Login failed';
-        setError(errorMessage);
+      if (axios.isAxiosError(error)) {
+        const errorData = error.response?.data;
+        console.error('Error response data:', errorData);
+        
+        if (errorData?.error === "Please verify your email before logging in") {
+          setError('Please check your email and verify your account before logging in.');
+        } else if (errorData?.error === "Invalid Login Details") {
+          setError('Invalid email or password. Please try again.');
+        } else {
+          setError(errorData?.error || 'Login failed. Please try again.');
+        }
       } else {
         setError('Login failed. Please try again.');
       }

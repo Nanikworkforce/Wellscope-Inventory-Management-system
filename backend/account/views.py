@@ -40,51 +40,84 @@ class UserRegistrationViewset(viewsets.ViewSet):
         try:
             first_name = request.data.get("first_name")
             last_name = request.data.get("last_name")
-            email = request.data.get("email")
+            email = request.data.get("email", "").lower().strip()  # Normalize email
             password = request.data.get("password")
             confirm_password = request.data.get("confirm_password")
+
+            print(f"Registration attempt for email: {email}")  # Debug log
 
             if not all([email, password, confirm_password]):
                 return Response(
                     {"Error": _("All inputs must be provided")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if User.objects.filter(email=email).exists():
+
+            # Check if user exists - with debug logging
+            existing_user = User.objects.filter(email=email).first()
+            if existing_user:
+                print(f"Existing user found: {email}")
+                print(
+                    f"Status - Active: {existing_user.is_active}, Verified: {existing_user.is_verified}"
+                )
                 return Response(
                     {"Error": _("Email Already exists")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
             if password != confirm_password:
                 return Response(
                     {"Error": _("Password Fields Do not match")},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            if email and password:
+            try:
+                # Create user with debug logging
+                print(f"Creating new user: {email}")
                 user = User.objects.create_user(
                     email=email,
                     password=password,
                     first_name=first_name,
                     last_name=last_name,
-                    is_active=False,  # Set user as inactive until email verification
+                    is_active=False,
+                    is_verified=False,
                 )
+
+                # Explicitly commit to database
                 user.save()
-                user_email(request, user)  # Send verification email
+
+                # Verify user was saved
+                saved_user = User.objects.get(email=email)
+                print(
+                    f"""
+                User created successfully:
+                - Email: {saved_user.email}
+                - ID: {saved_user.id}
+                - Active: {saved_user.is_active}
+                - Verified: {saved_user.is_verified}
+                - Has password: {saved_user.has_usable_password()}
+                """
+                )
+
+                # Send verification email
+                user_email(request, saved_user)
+                print(f"Verification email sent to: {email}")
+
                 return Response(
                     {
                         "message": "Registration successful. Please check your email to verify your account.",
                         "email": user.email,
+                        "user_id": user.id,
                     },
                     status=status.HTTP_201_CREATED,
                 )
-            else:
-                return Response(
-                    {"Error": _("Password and Email should be Provided")},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            except Exception as e:
+                print(f"Error creating user: {str(e)}")
+                raise
+
         except Exception as e:
+            print(f"Registration error: {str(e)}")
             return Response(
-                {"error": f"Internal Server Error: {str(e)}"},
+                {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -100,7 +133,7 @@ class LoginViewset(viewsets.ViewSet):
     serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    @action(detail=False, methods=["post"])
     def login(self, request):
         try:
             email = request.data.get("email")
@@ -166,15 +199,29 @@ class VerifyEmailViewSet(viewsets.GenericViewSet):
     @action(methods=["get"], detail=False)
     def verify(self, request):
         token = request.GET.get("token")
+        print(
+            f"Verification attempt with token: {token[:20]}..."
+        )  # Debug log - show first 20 chars
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            print(f"Decoded payload: {payload}")  # Debug log
+
             user = User.objects.get(id=payload["user_id"])
+            print(
+                f"Found user: {user.email}, Current status - Active: {user.is_active}, Verified: {user.is_verified}"
+            )
 
             if not user.is_verified:
                 user.is_verified = True
                 user.is_active = True
                 user.save()
+
+                # Verify the changes were saved
+                updated_user = User.objects.get(id=user.id)
+                print(
+                    f"User updated - Active: {updated_user.is_active}, Verified: {updated_user.is_verified}"
+                )
 
                 return Response(
                     {"message": "Email verified successfully"},
@@ -182,22 +229,26 @@ class VerifyEmailViewSet(viewsets.GenericViewSet):
                 )
             else:
                 return Response(
-                    {"message": "Email already verified"}, status=status.HTTP_200_OK
+                    {"message": "Email already verified"},
+                    status=status.HTTP_200_OK,
                 )
 
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as e:
+            print(f"Token expired: {str(e)}")
             return Response(
                 {"error": "Verification link has expired"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        except (jwt.DecodeError, User.DoesNotExist):
+        except (jwt.DecodeError, User.DoesNotExist) as e:
+            print(f"Verification error: {str(e)}")
             return Response(
                 {"error": "Invalid verification link"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         except Exception as e:
+            print(f"Unexpected error: {str(e)}")
             return Response(
                 {"error": f"Verification failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
