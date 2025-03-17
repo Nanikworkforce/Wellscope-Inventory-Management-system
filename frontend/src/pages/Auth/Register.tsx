@@ -59,7 +59,14 @@ const Register = () => {
     }
 
     try {
-      console.log('Sending registration request...'); // Debug log
+      console.log('Registration payload:', {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirm_password
+      });
+
       const response = await axios.post(
         `${AUTH_BASE_URL}/register/`,
         {
@@ -68,18 +75,35 @@ const Register = () => {
           email: formData.email,
           password: formData.password,
           confirm_password: formData.confirm_password
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
       );
-      console.log('Registration response:', response.data); // Debug log
 
-      setSuccess('Registration successful! Please check your email to verify your account.');
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      console.log('Registration response:', response.data);
+
+      if (response.status === 201) {
+        setSuccess('Registration successful! Please check your email to verify your account.');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
     } catch (error) {
-      console.error('Registration error:', error); // Debug log
+      console.error('Registration error:', error);
       if (axios.isAxiosError(error) && error.response) {
-        setError(error.response.data.Error || 'Registration failed');
+        const errorData = error.response.data;
+        if (typeof errorData === 'object') {
+          // Handle field-specific errors
+          const errorMessage = Object.entries(errorData)
+            .map(([field, messages]) => `${field}: ${messages}`)
+            .join('\n');
+          setError(errorMessage);
+        } else {
+          setError(errorData.toString() || 'Registration failed');
+        }
       } else {
         setError('Registration failed. Please try again.');
       }
