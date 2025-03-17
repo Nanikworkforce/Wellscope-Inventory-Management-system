@@ -96,34 +96,65 @@ class UserRegistrationViewset(viewsets.ViewSet):
 class LoginViewset(viewsets.GenericViewSet):
     serializer_class = UserLoginSerializer
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    @action(detail=False, methods=["post"])
     def login(self, request):
         try:
-            email = request.data.get("email")
-            password = request.data.get("password")
-            user = authenticate(self, email=email, password=password)
+            # Get and validate input data
+            data = request.data
+            print("Login request data:", data)  # Debug log
 
-            if user:
-                if user.is_active:
-                    login(request, user)
-                    return Response(
-                        {"Message": _("Login Successful")},
-                        status=status.HTTP_201_CREATED,
-                    )
-                else:
-                    return Response(
-                        {"Error": _("Account is Inactive")},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
-            else:
+            email = data.get("email", "").lower().strip()
+            password = data.get("password", "")
+
+            if not email or not password:
                 return Response(
-                    {"Error": _("Invalid Login Detailed Provided")},
+                    {"error": "Please provide both email and password"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-        except Exception as e:
+            try:
+                user = User.objects.get(email=email)
+                print(
+                    f"Found user: {user.email}, Active: {user.is_active}, Verified: {user.is_verified}"
+                )
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "Invalid email or password"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            user = authenticate(request, email=email, password=password)
+            if not user:
+                return Response(
+                    {"error": "Invalid email or password"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            if not user.is_verified:
+                return Response(
+                    {"error": "Please verify your email before logging in"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            if not user.is_active:
+                return Response(
+                    {"error": "Your account is not active"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            login(request, user)
+            refresh = RefreshToken.for_user(user)
+
             return Response(
-                {"error": f"Internal Server Error: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {
+                    "message": "Login successful",
+                    "token": {
+                        "access": str(refresh.access_token),
+                        "refresh": str(refresh),
+                    },
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            print(f"Login error: {str(e)}")
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     @action(detail=False, methods=["post"], permission_classes=[AllowAny])
