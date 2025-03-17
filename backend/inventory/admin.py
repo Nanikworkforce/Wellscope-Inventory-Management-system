@@ -9,6 +9,7 @@ from .models.usageLogs import UsageLog
 from .models.equipment_category import EquipmentCategory
 from .models.project_equipment import ProjectEquipment
 
+
 @admin.register(ProjectEquipment)
 class ProjecttEquipmentAdmin(admin.ModelAdmin):
     list_display=["project","equipment","release_date","hours_allocated"]
