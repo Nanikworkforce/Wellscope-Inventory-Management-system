@@ -111,32 +111,85 @@ class LoginViewset(viewsets.GenericViewSet):
                     {"error": "Please provide both email and password"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+
+            # Check if user exists
             try:
                 user = User.objects.get(email=email)
                 print(
-                    f"Found user: {user.email}, Active: {user.is_active}, Verified: {user.is_verified}"
+                    f"""
+                User found:
+                - Email: {user.email}
+                - ID: {user.id}
+                - Active: {user.is_active}
+                - Verified: {user.is_verified}
+                - Has usable password: {user.has_usable_password()}
+                """
                 )
+
+                # Try direct password check
+                from django.contrib.auth.hashers import check_password
+
+                password_valid = check_password(password, user.password)
+                print(f"Password check result: {password_valid}")
+
+                # Try authenticate with both username and email
+                auth_user1 = authenticate(request, username=email, password=password)
+                auth_user2 = authenticate(request, email=email, password=password)
+
+                print(f"Authentication results:")
+                print(f"- Using username=email: {auth_user1}")
+                print(f"- Using email=email: {auth_user2}")
+
+                # If direct password check works but authenticate fails
+                if password_valid and not (auth_user1 or auth_user2):
+                    print("Password is correct but authenticate() failed")
+                    # Manually log in the user
+                    login(request, user)
+                    refresh = RefreshToken.for_user(user)
+
+                    return Response(
+                        {
+                            "message": "Login successful",
+                            "token": {
+                                "access": str(refresh.access_token),
+                                "refresh": str(refresh),
+                            },
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+
             except User.DoesNotExist:
+                print(f"No user found with email: {email}")
                 return Response(
                     {"error": "Invalid email or password"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+
+            # Standard authentication flow
             user = authenticate(request, email=email, password=password)
+            if not user:
+                user = authenticate(request, username=email, password=password)
+
             if not user:
                 return Response(
                     {"error": "Invalid email or password"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+
+            # Check verification and active status
             if not user.is_verified:
                 return Response(
                     {"error": "Please verify your email before logging in"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+
             if not user.is_active:
                 return Response(
                     {"error": "Your account is not active"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+
+            # Login successful
             login(request, user)
             refresh = RefreshToken.for_user(user)
 
