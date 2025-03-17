@@ -44,10 +44,13 @@ const Login = () => {
     setError('');
 
     try {
+      console.log('Attempting login...'); // Debug log
       const response = await axios.post(
-        `${AUTH_BASE_URL}/login/`,
+        `${AUTH_BASE_URL}/login/`,  // Updated to match backend URL pattern
         formData
       );
+      
+      console.log('Login response:', response.data); // Debug log
 
       const accessToken = response.data.token?.access || response.data.access;
       const refreshToken = response.data.token?.refresh || response.data.refresh;
@@ -59,15 +62,18 @@ const Login = () => {
         }
 
         axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-
-        // ✅ BEST FIX: redirect works on mobile & all browsers
         window.location.href = '/dashboard';
       } else {
-        setError('No access token received');
+        console.error('No access token in response:', response.data);
+        setError('Invalid login response');
       }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.detail || 'Login failed');
+    } catch (error) {
+      console.error('Login error:', error);
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage = error.response.data.detail || 
+                            error.response.data.error || 
+                            'Login failed';
+        setError(errorMessage);
       } else {
         setError('Login failed. Please try again.');
       }
