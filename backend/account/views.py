@@ -41,13 +41,13 @@ class UserRegistrationViewset(viewsets.ViewSet):
             last_name        = request.data.get('last_name')
             email            = request.data.get('email')
             password         = request.data.get('password','').strip()
-            password_confirm = request.data.get('password_confirm','').strip()
+            comfirm_password = request.data.get('password_confirm','').strip()
 
-            if not all([email,password,password_confirm,first_name,last_name]):
+            if not all([email,password,comfirm_password,first_name,last_name]):
                 return Response({'Error':_('All inputs must be provided')},status=status.HTTP_400_BAD_REQUEST)
             if User.objects.filter(email=email).exists():
                 return Response({'Error':_('Email Already exists')},status=status.HTTP_400_BAD_REQUEST)
-            if password != password_confirm:
+            if password != comfirm_password:
                 return Response({'Error':_('Password Fields Do not match')},status=status.HTTP_400_BAD_REQUEST)
             
             if email and password:
