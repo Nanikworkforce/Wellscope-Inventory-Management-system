@@ -129,84 +129,32 @@ class UserRegistrationViewset(viewsets.ViewSet):
         return Response({"Logout Successful"}, status=status.HTTP_200_OK)
 
 
-@method_decorator(csrf_exempt, name="dispatch")
-class LoginViewset(viewsets.ViewSet):
+class LoginViewset(viewsets.GenericViewSet):
     serializer_class = UserLoginSerializer
-    permission_classes = [AllowAny]
 
-    @action(detail=False, methods=["post"])
-    def login(self, request):
+    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
+    def login(self,request):
         try:
-            email = request.data.get("email", "").lower().strip()
-            password = request.data.get("password")
-
-            print(f"Login attempt for email: {email}")  # Debug log
-
-            # Check if user exists first
-            try:
-                user = User.objects.get(email=email)
-                print(
-                    f"""
-                User found:
-                - Email: {user.email}
-                - Active: {user.is_active}
-                - Verified: {user.is_verified}
-                - Has password: {user.has_usable_password()}
-                """
-                )
-            except User.DoesNotExist:
-                print(f"No user found with email: {email}")
-                return Response(
-                    {"error": "Invalid Login Details"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-
-            # Try to authenticate
-            user = authenticate(request, email=email, password=password)
-            print(f"Authentication result: {user}")  # Debug log
+            email = request.data.get('email')
+            password = request.data.get('password')
+            user = authenticate(self,email=email,password=password)
 
             if user:
-                if not user.is_verified:
-                    return Response(
-                        {"error": "Please verify your email before logging in"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
                 if user.is_active:
-                    login(request, user)
-                    refresh = RefreshToken.for_user(user)
-                    return Response(
-                        {
-                            "message": "Login Successful",
-                            "token": {
-                                "access": str(refresh.access_token),
-                                "refresh": str(refresh),
-                            },
-                        },
-                        status=status.HTTP_200_OK,
-                    )
+                    login(request,user)
+                    return Response({'Message':_('Login Successful')},status=status.HTTP_201_CREATED)
                 else:
-                    return Response(
-                        {"error": "Account is Inactive"},
-                        status=status.HTTP_401_UNAUTHORIZED,
-                    )
+                    return Response({'Error':_('Account is Inactive')},status=status.HTTP_401_UNAUTHORIZED)
             else:
-                print(f"Authentication failed for email: {email}")  # Debug log
-                return Response(
-                    {"error": "Invalid Login Details"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
+                return Response({'Error':_('Invalid Login Detailed Provided')},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(f"Login error: {str(e)}")  # Debug log
-            return Response(
-                {"error": f"Internal Server Error: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return Response({'error': f'Internal Server Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+            
 
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
-    # @method_decorator(csrf_exempt)
-    def logout(self, request):
+    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
+    def logout(self,request):
         logout(request)
-        return Response({"Logout Successful"}, status=status.HTTP_200_OK)
+        return Response({'Message':_('Logout Successful')},status=status.HTTP_200_OK)
 
 
 class VerifyEmailViewSet(viewsets.GenericViewSet):
