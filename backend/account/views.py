@@ -33,71 +33,103 @@ User = get_user_model()
 @method_decorator(csrf_exempt, name="dispatch")
 class UserRegistrationViewset(viewsets.ViewSet):
     serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny]
 
-    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
-    def register(self,request):
+    @action(detail=False, methods=["post"])
+    def register(self, request):
         try:
-            first_name       = request.data.get('first_name')
-            last_name        = request.data.get('last_name')
-            email            = request.data.get('email')
-            password         = request.data.get('password','').strip()
-            comfirm_password = request.data.get('password_confirm','').strip()
+            print("Received registration data:", request.data)
 
-            if not all([first_name,last_name,email,password,comfirm_password]):
-                return Response({'Error':_('All inputs must be provided')},status=status.HTTP_400_BAD_REQUEST)
-            if User.objects.filter(email=email).exists():
-                return Response({'Error':_('Email Already exists')},status=status.HTTP_400_BAD_REQUEST)
-            if password != comfirm_password:
-                return Response({'Error':_('Password Fields Do not match')},status=status.HTTP_400_BAD_REQUEST)
-            
-            if email and password:
-                user=User.objects.create_user(
-                    email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name
+            first_name = request.data.get("first_name")
+            last_name = request.data.get("last_name")
+            email = request.data.get("email", "").lower().strip()
+            password = request.data.get("password", "").strip()
+            confirm_password = request.data.get("confirm_password", "").strip()
+
+            # Validation
+            if not all([email, password, confirm_password, first_name, last_name]):
+                return Response(
+                    {"error": "All fields are required"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
-                user.save()
-                user_email(request,user)
-                return Response({'Message':_('Registration Successful')},status=status.HTTP_201_CREATED)
-            else:
-                return Response({'Error': _('Password and Email should be Provided')},status=status.HTTP_400_BAD_REQUEST)
+
+            if User.objects.filter(email=email).exists():
+                return Response(
+                    {"error": "Email already exists"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if password != confirm_password:
+                return Response(
+                    {"error": "Passwords do not match"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                is_active=False,
+                is_verified=False,
+            )
+            user_email(request, user)
+            return Response(
+                {
+                    "message": "Registration successful! Please check your email to verify your account.",
+                    "email": user.email,
+                },
+                status=status.HTTP_201_CREATED,
+            )
 
         except Exception as e:
-            return Response({'error': f'Internal Server Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-    
-    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
-    def logout(self,request):
+            print(f"Registration error: {str(e)}")
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def logout(self, request):
         logout(request)
-        return Response(_('Logout Successful'),status=status.HTTP_200_OK)
-    
+        return Response(_("Logout Successful"), status=status.HTTP_200_OK)
+
 
 class LoginViewset(viewsets.GenericViewSet):
     serializer_class = UserLoginSerializer
 
-    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
-    def login(self,request):
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def login(self, request):
         try:
-            email = request.data.get('email')
-            password = request.data.get('password')
-            user = authenticate(self,email=email,password=password)
+            email = request.data.get("email")
+            password = request.data.get("password")
+            user = authenticate(self, email=email, password=password)
 
             if user:
                 if user.is_active:
-                    login(request,user)
-                    return Response({'Message':_('Login Successful')},status=status.HTTP_201_CREATED)
+                    login(request, user)
+                    return Response(
+                        {"Message": _("Login Successful")},
+                        status=status.HTTP_201_CREATED,
+                    )
                 else:
-                    return Response({'Error':_('Account is Inactive')},status=status.HTTP_401_UNAUTHORIZED)
+                    return Response(
+                        {"Error": _("Account is Inactive")},
+                        status=status.HTTP_401_UNAUTHORIZED,
+                    )
             else:
-                return Response({'Error':_('Invalid Login Detailed Provided')},status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"Error": _("Invalid Login Detailed Provided")},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         except Exception as e:
-            return Response({'error': f'Internal Server Error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
-            
+            return Response(
+                {"error": f"Internal Server Error: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
-    @action(detail=False,methods=['post'],permission_classes=[AllowAny])
-    def logout(self,request):
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
+    def logout(self, request):
         logout(request)
-        return Response({'Message':_('Logout Successful')},status=status.HTTP_200_OK)
+        return Response({"Message": _("Logout Successful")}, status=status.HTTP_200_OK)
 
 
 class VerifyEmailViewSet(viewsets.GenericViewSet):
