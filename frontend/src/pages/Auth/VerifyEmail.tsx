@@ -21,9 +21,10 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
+        const verifyUrl = `${AUTH_BASE_URL}/account/verify/verify/?token=${token}`;
+        console.log('Verification URL:', verifyUrl);
         
-        console.log('Verification URL:', `${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
+        const response = await axios.get(verifyUrl);
         console.log('Response:', response.data);
         
         setStatus('success');
@@ -32,7 +33,6 @@ const VerifyEmail = () => {
           navigate('/login');
         }, 3000);
       } catch (error) {
-        console.error('Verification URL:', `${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
         console.error('Verification error:', error);
         setStatus('error');
         if (axios.isAxiosError(error) && error.response) {
