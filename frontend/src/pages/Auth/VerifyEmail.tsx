@@ -20,7 +20,7 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`${API_BASE_URL}/auth/verify/?token=${token}`);
+        const response = await axios.get(`${API_BASE_URL}/account/verify/verify/?token=${token}`);
         setStatus('success');
         setMessage(response.data.message || 'Email verified successfully! You can now login.');
         setTimeout(() => {
