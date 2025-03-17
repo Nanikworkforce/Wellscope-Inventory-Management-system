@@ -71,7 +71,6 @@ class UserRegistrationViewset(viewsets.ViewSet):
             try:
                 # Create user
                 print(f"Creating user with email: {email}")
-                User = get_user_model()
                 user = User.objects.create_user(
                     email=email,
                     password=password,
