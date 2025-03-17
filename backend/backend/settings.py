@@ -172,8 +172,6 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-# Site URL for verification links
-SITE_URL = "https://nanik-ims.vercel.app"  # your deployed frontend URL
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -184,5 +182,13 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# Site URL for verification links
-SITE_URL = "http://localhost:3000"
+if DEBUG:
+    SITE_URL = "http://localhost:3000"
+else:
+    SITE_URL = "https://nanik-ims.vercel.app"
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {'type': 'apiKey', 'name': 'Authorization', 'in': 'header'}
+    }
+}
