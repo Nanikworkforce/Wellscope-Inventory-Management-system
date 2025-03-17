@@ -59,26 +59,27 @@ const Register = () => {
     }
 
     try {
+      console.log('Sending registration request...'); // Debug log
       const response = await axios.post(
         `${AUTH_BASE_URL}/register/`,
-        formData
+        {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email,
+          password: formData.password,
+          confirm_password: formData.confirm_password
+        }
       );
-      
-      if (response.status === 201) {
-        setSuccess('Registration successful! Please check your email to verify your account.');
-        setTimeout(() => {
-          navigate('/login');
-        }, 5000);
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        const errorData = err.response.data;
-        const errorMessage = errorData.Error 
-          || errorData.error
-          || errorData.message 
-          || errorData.detail 
-          || 'Registration failed';
-        setError(errorMessage);
+      console.log('Registration response:', response.data); // Debug log
+
+      setSuccess('Registration successful! Please check your email to verify your account.');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (error) {
+      console.error('Registration error:', error); // Debug log
+      if (axios.isAxiosError(error) && error.response) {
+        setError(error.response.data.Error || 'Registration failed');
       } else {
         setError('Registration failed. Please try again.');
       }
