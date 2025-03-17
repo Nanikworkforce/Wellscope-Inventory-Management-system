@@ -163,37 +163,51 @@ class VerifyEmailViewSet(viewsets.GenericViewSet):
             )
         ]
     )
-    @action(
-        methods=["get"],
-        detail=False,
-    )
+    @action(methods=["get"], detail=False)
     def verify(self, request):
         token = request.GET.get("token")
 
         try:
-            email_token = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            user = User.objects.get(id=email_token["user_id"])
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+            user = User.objects.get(id=payload["user_id"])
+
             if not user.is_verified:
                 user.is_verified = True
+                user.is_active = True
                 user.save()
+
+                return Response(
+                    {"message": "Email verified successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "Email already verified"}, status=status.HTTP_200_OK
+                )
+
+        except jwt.ExpiredSignatureError:
             return Response(
-                {"email": "User is Successfully activated"}, status=status.HTTP_200_OK
-            )
-        except jwt.ExpiredSignatureError as e:
-            return Response(
-                {"Error": f"Email Activation Expired : {str(e)}"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except jwt.exceptions.DecodeError as e:
-            return Response(
-                {"Error": f"Invalid Token : {str(e)}"},
+                {"error": "Verification link has expired"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        except (jwt.DecodeError, User.DoesNotExist):
+            return Response(
+                {"error": "Invalid verification link"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": f"Verification failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
     def generate_token(user):
-        expiration = datetime.utcnow() + timedelta(
-            hours=24
-        )  # Adjust the expiration time as needed
+        expiration = datetime.utcnow() + timedelta(hours=24)
         payload = {"user_id": user.id, "exp": expiration, "iat": datetime.utcnow()}
+        print(f"Token payload: {payload}")
+        print(f"User found: {user}")
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+        print(f"Generated token: {token}")
         return token

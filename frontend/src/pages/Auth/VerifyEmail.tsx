@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
-import { AUTH_BASE_URL } from '../../config.ts';
+import { API_BASE_URL } from '../../config.ts';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -20,15 +20,19 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`${AUTH_BASE_URL}/verify/?token=${token}`);
+        const response = await axios.get(`${API_BASE_URL}/auth/verify/?token=${token}`);
         setStatus('success');
-        setMessage('Email verified successfully! You can now login.');
+        setMessage(response.data.message || 'Email verified successfully! You can now login.');
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } catch (error) {
         setStatus('error');
-        setMessage('Email verification failed. Please try again or contact support.');
+        if (axios.isAxiosError(error) && error.response) {
+          setMessage(error.response.data.error || 'Email verification failed');
+        } else {
+          setMessage('Email verification failed. Please try again or contact support.');
+        }
       }
     };
 
@@ -42,22 +46,23 @@ const VerifyEmail = () => {
       alignItems="center"
       justifyContent="center"
       minHeight="100vh"
+      padding={3}
     >
       {status === 'verifying' && (
         <>
-          <CircularProgress />
+          <CircularProgress sx={{ color: '#F97316' }} />
           <Typography variant="h6" sx={{ mt: 2 }}>
             Verifying your email...
           </Typography>
         </>
       )}
       {(status === 'success' || status === 'error') && (
-        <Typography
-          variant="h6"
-          color={status === 'success' ? 'success.main' : 'error.main'}
+        <Alert 
+          severity={status === 'success' ? 'success' : 'error'}
+          sx={{ mt: 2 }}
         >
           {message}
-        </Typography>
+        </Alert>
       )}
     </Box>
   );

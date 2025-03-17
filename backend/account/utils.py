@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from django.core.mail import EmailMessage, send_mail
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth import get_user_model
+import jwt
 
 
 # user=get_user_model()
@@ -21,11 +22,24 @@ class Util:
 
 
 def user_email(request, user):
-    token = RefreshToken.for_user(user).access_token
-    absurl = f"{settings.SITE_URL}/verify-email?token={str(token)}"
-    email_body = (
-        f"Hi {user.email}\nUse the link below to verify your account:\n{absurl}"
+    expiration = datetime.utcnow() + timedelta(hours=24)
+    token = jwt.encode(
+        {"user_id": user.id, "exp": expiration, "iat": datetime.utcnow()},
+        settings.SECRET_KEY,
+        algorithm="HS256",
     )
+
+    absurl = f"{settings.SITE_URL}/verify-email?token={token}"
+    email_body = f"""
+    Hi {user.email},
+    
+    Thank you for registering! Please click the link below to verify your account:
+    
+    {absurl}
+    
+    This link will expire in 24 hours.
+    """
+
     data = {
         "email_body": email_body,
         "to_email": user.email,
