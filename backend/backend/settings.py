@@ -182,10 +182,10 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-if DEBUG:
-    SITE_URL = "http://localhost:3000"
-else:
-    SITE_URL = "https://nanik-ims.vercel.app"
+# if DEBUG:
+#     SITE_URL = "http://localhost:3000"
+# else:
+SITE_URL = "https://nanik-ims.vercel.app"
 
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
