@@ -137,9 +137,33 @@ class LoginViewset(viewsets.ViewSet):
     @action(detail=False, methods=["post"])
     def login(self, request):
         try:
-            email = request.data.get("email")
+            email = request.data.get("email", "").lower().strip()
             password = request.data.get("password")
+
+            print(f"Login attempt for email: {email}")  # Debug log
+
+            # Check if user exists first
+            try:
+                user = User.objects.get(email=email)
+                print(
+                    f"""
+                User found:
+                - Email: {user.email}
+                - Active: {user.is_active}
+                - Verified: {user.is_verified}
+                - Has password: {user.has_usable_password()}
+                """
+                )
+            except User.DoesNotExist:
+                print(f"No user found with email: {email}")
+                return Response(
+                    {"error": "Invalid Login Details"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+
+            # Try to authenticate
             user = authenticate(request, email=email, password=password)
+            print(f"Authentication result: {user}")  # Debug log
 
             if user:
                 if not user.is_verified:
@@ -166,11 +190,13 @@ class LoginViewset(viewsets.ViewSet):
                         status=status.HTTP_401_UNAUTHORIZED,
                     )
             else:
+                print(f"Authentication failed for email: {email}")  # Debug log
                 return Response(
                     {"error": "Invalid Login Details"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
         except Exception as e:
+            print(f"Login error: {str(e)}")  # Debug log
             return Response(
                 {"error": f"Internal Server Error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
