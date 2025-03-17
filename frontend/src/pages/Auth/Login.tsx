@@ -68,10 +68,21 @@ const Login = () => {
       console.log('Login response:', response.data);
 
       if (response.data.token?.access) {
+        // Store tokens in localStorage
         localStorage.setItem('accessToken', response.data.token.access);
         localStorage.setItem('refreshToken', response.data.token.refresh);
+        
+        // Set default Authorization header for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
-        window.location.href = '/dashboard';
+        
+        console.log('Login successful, redirecting to dashboard...');
+        
+        // Use React Router for navigation if available
+        if (window.location.href.includes('vercel.app')) {
+          window.location.href = '/dashboard';
+        } else {
+          window.location.href = '/dashboard';
+        }
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');
