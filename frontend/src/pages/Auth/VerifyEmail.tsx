@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import axios from 'axios';
-import { API_BASE_URL } from '../../config.ts';
+import { AUTH_BASE_URL } from '../../config.ts';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -13,6 +13,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       const token = searchParams.get('token');
+      
       if (!token) {
         setStatus('error');
         setMessage('Invalid verification link');
@@ -20,13 +21,19 @@ const VerifyEmail = () => {
       }
 
       try {
-        const response = await axios.get(`${API_BASE_URL}/account/verify/verify/?token=${token}`);
+        const response = await axios.get(`${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
+        
+        console.log('Verification URL:', `${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
+        console.log('Response:', response.data);
+        
         setStatus('success');
         setMessage(response.data.message || 'Email verified successfully! You can now login.');
         setTimeout(() => {
           navigate('/login');
         }, 3000);
       } catch (error) {
+        console.error('Verification URL:', `${AUTH_BASE_URL}/account/verify/verify/?token=${token}`);
+        console.error('Verification error:', error);
         setStatus('error');
         if (axios.isAxiosError(error) && error.response) {
           setMessage(error.response.data.error || 'Email verification failed');
