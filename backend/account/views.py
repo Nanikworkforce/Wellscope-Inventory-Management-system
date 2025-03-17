@@ -226,9 +226,7 @@ class VerifyEmailViewSet(viewsets.GenericViewSet):
     @action(methods=["get"], detail=False)
     def verify(self, request):
         token = request.GET.get("token")
-        print(
-            f"Verification attempt with token: {token[:20]}..."
-        )  # Debug log - show first 20 chars
+        print(f"Verification attempt with token: {token[:20]}...")  # Debug log
 
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
@@ -236,22 +234,32 @@ class VerifyEmailViewSet(viewsets.GenericViewSet):
 
             user = User.objects.get(id=payload["user_id"])
             print(
-                f"Found user: {user.email}, Current status - Active: {user.is_active}, Verified: {user.is_verified}"
+                f"""
+            User before verification:
+            - Email: {user.email}
+            - Active: {user.is_active}
+            - Verified: {user.is_verified}
+            """
             )
 
             if not user.is_verified:
                 user.is_verified = True
-                user.is_active = True
+                user.is_active = True  # Make sure to set is_active to True
                 user.save()
 
                 # Verify the changes were saved
                 updated_user = User.objects.get(id=user.id)
                 print(
-                    f"User updated - Active: {updated_user.is_active}, Verified: {updated_user.is_verified}"
+                    f"""
+                User after verification:
+                - Email: {updated_user.email}
+                - Active: {updated_user.is_active}
+                - Verified: {updated_user.is_verified}
+                """
                 )
 
                 return Response(
-                    {"message": "Email verified successfully"},
+                    {"message": "Email verified successfully! You can now login."},
                     status=status.HTTP_200_OK,
                 )
             else:
