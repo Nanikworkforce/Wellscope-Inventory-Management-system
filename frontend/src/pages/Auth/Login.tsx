@@ -50,6 +50,14 @@ const Login = () => {
     try {
       const loginUrl = `${AUTH_BASE_URL}/login/`;
       
+      console.log('Login attempt:', {
+        url: loginUrl,
+        data: {
+          email: formData.email.toLowerCase().trim(),
+          password: '********' // Don't log actual password
+        }
+      });
+
       const response = await axios.post(
         loginUrl,
         {
@@ -63,6 +71,8 @@ const Login = () => {
           }
         }
       );
+      
+      console.log('Login response:', response.data);
 
       if (response.data.token?.access) {
         // Store tokens in localStorage
@@ -72,11 +82,18 @@ const Login = () => {
         // Set default Authorization header for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         
-        // Update authentication state
-        setIsAuthenticated(true);
+        console.log('Login successful, tokens stored');
         
-        // Navigate to dashboard
-        navigate('/dashboard');
+        // Check if tokens were properly stored
+        const storedAccessToken = localStorage.getItem('accessToken');
+        console.log('Stored access token:', storedAccessToken ? 'Present' : 'Missing');
+        
+        // Use React Router for navigation if available
+        if (window.location.pathname !== '/dashboard') {
+          console.log('Redirecting to dashboard...');
+          // Force a hard navigation to ensure everything is reloaded
+          window.location.href = '/dashboard';
+        }
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');

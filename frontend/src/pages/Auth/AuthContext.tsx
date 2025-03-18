@@ -1,38 +1,57 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  setIsAuthenticated: (value: boolean) => void;
+  login: (token: string, refreshToken: string) => void;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  login: () => {},
+  logout: () => {},
+});
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export const useAuth = () => useContext(AuthContext);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    setIsAuthenticated(!!accessToken);
+    // Check if user is authenticated on mount
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setIsAuthenticated(true);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      setIsAuthenticated(false);
+      delete axios.defaults.headers.common['Authorization'];
+    }
   }, []);
 
+  const login = (token: string, refreshToken: string) => {
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('refreshToken', refreshToken);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    setIsAuthenticated(true);
+  };
+
   const logout = () => {
+    console.log('Logging out...');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
+    delete axios.defaults.headers.common['Authorization'];
     setIsAuthenticated(false);
+    
+    // Force redirect to login page
+    console.log('Redirecting to login page after logout');
+    window.location.href = '/login';
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }; 

@@ -25,6 +25,7 @@ import UseLogs from './components/Equipment/UseLogs.tsx';
 import Profile from './components/Profile/Profile.tsx';
 import VerifyEmail from './pages/Auth/VerifyEmail.tsx';
 import { AuthProvider, useAuth } from './pages/Auth/AuthContext.tsx';
+import axios from 'axios';
 
 const theme = createTheme({
   palette: {
@@ -48,6 +49,25 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
+  useEffect(() => {
+    // Check if the user is trying to access a protected route without authentication
+    const currentPath = window.location.pathname;
+    const isProtectedRoute = 
+      currentPath === '/dashboard' || 
+      currentPath === '/' || 
+      currentPath.startsWith('/equipment') ||
+      currentPath.startsWith('/customers') ||
+      currentPath.startsWith('/projects') ||
+      currentPath.startsWith('/tracking') ||
+      currentPath.startsWith('/maintenance') ||
+      currentPath.startsWith('/finance');
+    
+    if (isProtectedRoute && !isAuthenticated()) {
+      console.log('Protected route accessed without authentication, redirecting to login');
+      window.location.href = '/login';
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <ThemeProvider theme={theme}>
@@ -138,6 +158,13 @@ const AppRoutes = () => {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
+};
+
+// Simple auth check function
+const isAuthenticated = () => {
+  const token = localStorage.getItem('accessToken');
+  console.log('Auth check - Token exists:', !!token);
+  return !!token;
 };
 
 export default App;
