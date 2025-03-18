@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Box, Typography, Paper, Button, CircularProgress, Container } from '@mui/material';
 import axios from 'axios';
-import { AUTH_BASE_URL } from '../../config.ts';
+import { AUTH_BASE_URL } from '../../config';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [verificationStatus, setVerificationStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -15,63 +14,100 @@ const VerifyEmail = () => {
       const token = searchParams.get('token');
       
       if (!token) {
-        setStatus('error');
-        setMessage('Invalid verification link');
+        setVerificationStatus('error');
+        setMessage('Verification token is missing.');
         return;
       }
-
+      
       try {
-        const verifyUrl = `${AUTH_BASE_URL}/verify/verify/?token=${token}`;
-        console.log('Verification URL:', verifyUrl);
+        const response = await axios.post(`${AUTH_BASE_URL}/verify-email/`, { token });
+        console.log('Verification response:', response.data);
         
-        const response = await axios.get(verifyUrl);
-        console.log('Response:', response.data);
+        setVerificationStatus('success');
+        setMessage(response.data.message || 'Your email has been successfully verified.');
         
-        setStatus('success');
-        setMessage(response.data.message || 'Email verified successfully! You can now login.');
+        // Clear any existing tokens to ensure a fresh login
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        
+        // Redirect to login page after 3 seconds
         setTimeout(() => {
-          navigate('/login');
+          window.location.href = '/login';
         }, 3000);
+        
       } catch (error) {
         console.error('Verification error:', error);
-        setStatus('error');
+        setVerificationStatus('error');
+        
         if (axios.isAxiosError(error) && error.response) {
-          setMessage(error.response.data.error || 'Email verification failed');
+          setMessage(error.response.data.error || 'Email verification failed. Please try again.');
         } else {
-          setMessage('Email verification failed. Please try again or contact support.');
+          setMessage('An unexpected error occurred. Please try again later.');
         }
       }
     };
-
+    
     verifyEmail();
-  }, [searchParams, navigate]);
+  }, [searchParams]);
 
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      minHeight="100vh"
-      padding={3}
-    >
-      {status === 'verifying' && (
-        <>
-          <CircularProgress sx={{ color: '#F97316' }} />
-          <Typography variant="h6" sx={{ mt: 2 }}>
-            Verifying your email...
-          </Typography>
-        </>
-      )}
-      {(status === 'success' || status === 'error') && (
-        <Alert 
-          severity={status === 'success' ? 'success' : 'error'}
-          sx={{ mt: 2 }}
-        >
-          {message}
-        </Alert>
-      )}
-    </Box>
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {verificationStatus === 'loading' && (
+            <>
+              <CircularProgress sx={{ mb: 2 }} />
+              <Typography variant="h5" gutterBottom>
+                Verifying your email...
+              </Typography>
+            </>
+          )}
+          
+          {verificationStatus === 'success' && (
+            <>
+              <Typography variant="h5" color="primary" gutterBottom>
+                Email Verified!
+              </Typography>
+              <Typography variant="body1" align="center" paragraph>
+                {message}
+              </Typography>
+              <Typography variant="body2" align="center" paragraph>
+                You will be redirected to the login page in a few seconds...
+              </Typography>
+              <Button 
+                component={Link} 
+                to="/login" 
+                variant="contained" 
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                Go to Login
+              </Button>
+            </>
+          )}
+          
+          {verificationStatus === 'error' && (
+            <>
+              <Typography variant="h5" color="error" gutterBottom>
+                Verification Failed
+              </Typography>
+              <Typography variant="body1" align="center" paragraph>
+                {message}
+              </Typography>
+              <Button 
+                component={Link} 
+                to="/login" 
+                variant="contained" 
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                Go to Login
+              </Button>
+            </>
+          )}
+        </Box>
+      </Paper>
+    </Container>
   );
 };
 
