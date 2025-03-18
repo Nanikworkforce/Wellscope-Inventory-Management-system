@@ -18,6 +18,7 @@ import oilRigImage from '../../assets/images/oil.jpg';
 import wsLogo from '../../assets/images/ws1.png';
 import { AUTH_BASE_URL } from '../../config.ts';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext.tsx';
 
 interface LoginFormData {
   email: string;
@@ -33,6 +34,7 @@ const Login = () => {
     password: '',
   });
   const navigate = useNavigate();
+  const { setIsAuthenticated } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -70,8 +72,11 @@ const Login = () => {
         // Set default Authorization header for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         
-        // Force a reload to update the authentication state
-        window.location.reload();
+        // Update authentication state
+        setIsAuthenticated(true);
+        
+        // Navigate to dashboard
+        navigate('/dashboard');
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');

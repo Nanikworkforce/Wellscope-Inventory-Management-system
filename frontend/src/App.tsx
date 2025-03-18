@@ -24,6 +24,7 @@ import EquipmentCategory from './components/Equipment/EquipmentCategory.tsx';
 import UseLogs from './components/Equipment/UseLogs.tsx';
 import Profile from './components/Profile/Profile.tsx';
 import VerifyEmail from './pages/Auth/VerifyEmail.tsx';
+import { AuthProvider, useAuth } from './pages/Auth/AuthContext.tsx';
 
 const theme = createTheme({
   palette: {
@@ -37,7 +38,7 @@ const theme = createTheme({
 });
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = localStorage.getItem('accessToken');
+  const { isAuthenticated } = useAuth();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" />;
@@ -47,12 +48,23 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  return (
+    <AuthProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
+  );
+};
+
+// Separate the routes into a new component
+const AppRoutes = () => {
+  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('accessToken');
-    setIsAuthenticated(!!accessToken);
     setIsLoading(false);
   }, []);
 
@@ -61,74 +73,70 @@ const App = () => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route 
-            path="/" 
-            element={
-              isAuthenticated 
-                ? <Navigate to="/dashboard" /> 
-                : <Navigate to="/login" />
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              isAuthenticated 
-                ? <Navigate to="/dashboard" /> 
-                : <Login />
-            } 
-          />
-          <Route 
-            path="/register" 
-            element={
-              isAuthenticated 
-                ? <Navigate to="/dashboard" /> 
-                : <Register />
-            } 
-          />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+    <Routes>
+      {/* Public routes */}
+      <Route 
+        path="/" 
+        element={
+          isAuthenticated 
+            ? <Navigate to="/dashboard" /> 
+            : <Navigate to="/login" />
+        } 
+      />
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated 
+            ? <Navigate to="/dashboard" /> 
+            : <Login />
+        } 
+      />
+      <Route 
+        path="/register" 
+        element={
+          isAuthenticated 
+            ? <Navigate to="/dashboard" /> 
+            : <Register />
+        } 
+      />
+      <Route path="/verify-email" element={<VerifyEmail />} />
 
-          {/* Protected routes */}
-          <Route 
-            element={
-              isAuthenticated ? (
-                <Layout>
-                  <Outlet />
-                </Layout>
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          >
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/equipment" element={<EquipmentList />} />
-            <Route path="/customers" element={<CustomerList />} />
-            <Route path="/customers/add" element={<AddCustomer />} />
-            <Route path="/customers/edit/:id" element={<EditCustomer />} />
-            <Route path="/customers/:id" element={<ViewCustomer />} />
-            <Route path="/projects" element={<ProjectList />} />
-            <Route path="/maintenance" element={<MaintenanceList />} />
-            <Route path="/finance" element={<FinancialReports />} />
-            <Route path="/tracking" element={<LocationTracking />} />
-            <Route path="/equipment/new" element={<AddEquipment />} />
-            <Route path="/equipment/edit/:id" element={<EditEquipment />} />
-            <Route path="/equipment/:id" element={<ViewEquipment />} />
-            <Route path="/projects/edit/:id" element={<EditProject />} />
-            <Route path="/projects/:id" element={<ViewProject />} />
-            <Route path="/projects/add" element={<AddProject />} />
-            <Route path="/equipment/categories" element={<EquipmentCategory />} />
-            <Route path="/equipment/logs" element={<UseLogs />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
+      {/* Protected routes */}
+      <Route 
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <Outlet />
+            </Layout>
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/equipment" element={<EquipmentList />} />
+        <Route path="/customers" element={<CustomerList />} />
+        <Route path="/customers/add" element={<AddCustomer />} />
+        <Route path="/customers/edit/:id" element={<EditCustomer />} />
+        <Route path="/customers/:id" element={<ViewCustomer />} />
+        <Route path="/projects" element={<ProjectList />} />
+        <Route path="/maintenance" element={<MaintenanceList />} />
+        <Route path="/finance" element={<FinancialReports />} />
+        <Route path="/tracking" element={<LocationTracking />} />
+        <Route path="/equipment/new" element={<AddEquipment />} />
+        <Route path="/equipment/edit/:id" element={<EditEquipment />} />
+        <Route path="/equipment/:id" element={<ViewEquipment />} />
+        <Route path="/projects/edit/:id" element={<EditProject />} />
+        <Route path="/projects/:id" element={<ViewProject />} />
+        <Route path="/projects/add" element={<AddProject />} />
+        <Route path="/equipment/categories" element={<EquipmentCategory />} />
+        <Route path="/equipment/logs" element={<UseLogs />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
 
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
+      {/* Catch all route */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
