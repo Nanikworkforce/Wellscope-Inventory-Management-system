@@ -15,7 +15,8 @@ import {
   MenuItem,
   Divider,
   useTheme,
-  Stack
+  Stack,
+  ListItemButton
 } from '@mui/material';
 import { 
   Menu as MenuIcon,
@@ -34,6 +35,7 @@ import {
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import dkLogo from '../../assets/images/dkbg.jpg';
 import manImage from '../../assets/images/man1.jpg';
+import { useAuth } from '../../pages/Auth/AuthContext';
 
 const drawerWidth = 120;
 
@@ -47,20 +49,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { logout } = useAuth();
 
   const isDashboard = location.pathname === '/dashboard';
-
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Equipment Inventory', icon: <Inventory />, path: '/equipment' },
-    { text: 'Equipment Category', icon: <CategoryIcon />, path: '/equipment/categories' },
-    { text: 'Use Logs', icon: <HistoryIcon />, path: '/equipment/logs' },
-    { text: 'Customers', icon: <Business />, path: '/customers' },
-    { text: 'Projects Pipeline', icon: <Timeline />, path: '/projects' },
-    { text: 'Location Tracking', icon: <LocationOn />, path: '/tracking' },
-    { text: 'Maintenance', icon: <Engineering />, path: '/maintenance' },
-    { text: 'Financial Reports', icon: <AttachMoney />, path: '/finance' },
-  ];
 
   const handleDrawerToggle = () => {
     if (!isDashboard) {  // Only toggle if not on dashboard
@@ -77,9 +68,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
   };
+
+  const menuItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Equipment Inventory', icon: <Inventory />, path: '/equipment' },
+    { text: 'Equipment Category', icon: <CategoryIcon />, path: '/equipment/categories' },
+    { text: 'Use Logs', icon: <HistoryIcon />, path: '/equipment/logs' },
+    { text: 'Customers', icon: <Business />, path: '/customers' },
+    { text: 'Projects Pipeline', icon: <Timeline />, path: '/projects' },
+    { text: 'Location Tracking', icon: <LocationOn />, path: '/tracking' },
+    { text: 'Maintenance', icon: <Engineering />, path: '/maintenance' },
+    { text: 'Financial Reports', icon: <AttachMoney />, path: '/finance' },
+    {
+      text: 'Logout',
+      icon: <Logout />,
+      onClick: handleLogout
+    }
+  ];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -186,8 +194,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {menuItems.map((item) => (
                 <ListItem 
                   key={item.text} 
-                  component={Link} 
-                  to={item.path}
+                  disablePadding
                   selected={location.pathname === item.path}
                   sx={{
                     '&.Mui-selected': {
@@ -201,23 +208,47 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     },
                   }}
                 >
-                  <ListItemIcon 
-                    sx={{ 
-                      color: location.pathname === item.path ? '#F97316' : '#6B7280',
-                      minWidth: 40,
-                    }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    sx={{ 
-                      color: location.pathname === item.path ? '#F97316' : '#6B7280',
-                      '& .MuiTypography-root': {
-                        fontWeight: location.pathname === item.path ? 600 : 400,
-                      }
-                    }} 
-                  />
+                  {item.onClick ? (
+                    <ListItemButton onClick={item.onClick}>
+                      <ListItemIcon 
+                        sx={{ 
+                          color: location.pathname === item.path ? '#F97316' : '#6B7280',
+                          minWidth: 40,
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText 
+                        primary={item.text}
+                        sx={{ 
+                          color: location.pathname === item.path ? '#F97316' : '#6B7280',
+                          '& .MuiTypography-root': {
+                            fontWeight: location.pathname === item.path ? 600 : 400,
+                          }
+                        }} 
+                      />
+                    </ListItemButton>
+                  ) : (
+                    <ListItemButton component={Link} to={item.path}>
+                      <ListItemIcon 
+                        sx={{ 
+                          color: location.pathname === item.path ? '#F97316' : '#6B7280',
+                          minWidth: 40,
+                        }}
+                      >
+                        {item.icon}
+                      </ListItemIcon>
+                      <ListItemText 
+                        primary={item.text}
+                        sx={{ 
+                          color: location.pathname === item.path ? '#F97316' : '#6B7280',
+                          '& .MuiTypography-root': {
+                            fontWeight: location.pathname === item.path ? 600 : 400,
+                          }
+                        }} 
+                      />
+                    </ListItemButton>
+                  )}
                 </ListItem>
               ))}
             </List>
