@@ -51,8 +51,8 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token);
+    const accessToken = localStorage.getItem('accessToken');
+    setIsAuthenticated(!!accessToken);
     setIsLoading(false);
   }, []);
 
@@ -68,7 +68,7 @@ const App = () => {
           <Route 
             path="/" 
             element={
-              localStorage.getItem('accessToken') 
+              isAuthenticated 
                 ? <Navigate to="/dashboard" /> 
                 : <Navigate to="/login" />
             } 
@@ -76,7 +76,7 @@ const App = () => {
           <Route 
             path="/login" 
             element={
-              localStorage.getItem('accessToken') 
+              isAuthenticated 
                 ? <Navigate to="/dashboard" /> 
                 : <Login />
             } 
@@ -84,16 +84,17 @@ const App = () => {
           <Route 
             path="/register" 
             element={
-              localStorage.getItem('accessToken') 
+              isAuthenticated 
                 ? <Navigate to="/dashboard" /> 
                 : <Register />
             } 
           />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Protected routes */}
           <Route 
             element={
-              localStorage.getItem('accessToken') ? (
+              isAuthenticated ? (
                 <Layout>
                   <Outlet />
                 </Layout>
@@ -125,7 +126,6 @@ const App = () => {
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

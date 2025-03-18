@@ -46,17 +46,8 @@ const Login = () => {
     setError('');
 
     try {
-      // Correct URL format
       const loginUrl = `${AUTH_BASE_URL}/login/`;
       
-      console.log('Login attempt:', {
-        url: loginUrl,
-        data: {
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password
-        }
-      });
-
       const response = await axios.post(
         loginUrl,
         {
@@ -70,8 +61,6 @@ const Login = () => {
           }
         }
       );
-      
-      console.log('Login response:', response.data);
 
       if (response.data.token?.access) {
         // Store tokens in localStorage
@@ -81,14 +70,8 @@ const Login = () => {
         // Set default Authorization header for future requests
         axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
         
-        console.log('Login successful, tokens stored');
-        
-        // Check if tokens were properly stored
-        const storedAccessToken = localStorage.getItem('accessToken');
-        console.log('Stored access token:', storedAccessToken ? 'Present' : 'Missing');
-        
-        // Use React Router's navigate for client-side navigation
-        navigate('/dashboard');
+        // Force a reload to update the authentication state
+        window.location.reload();
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');
