@@ -36,6 +36,16 @@ const theme = createTheme({
   },
 });
 
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const isAuthenticated = localStorage.getItem('accessToken');
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,37 +68,37 @@ const App = () => {
           <Route 
             path="/" 
             element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Navigate to="/login" replace />
+              localStorage.getItem('accessToken') 
+                ? <Navigate to="/dashboard" /> 
+                : <Navigate to="/login" />
             } 
           />
           <Route 
             path="/login" 
             element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Login />
+              localStorage.getItem('accessToken') 
+                ? <Navigate to="/dashboard" /> 
+                : <Login />
             } 
           />
           <Route 
             path="/register" 
             element={
-              isAuthenticated ? 
-                <Navigate to="/dashboard" replace /> : 
-                <Register />
+              localStorage.getItem('accessToken') 
+                ? <Navigate to="/dashboard" /> 
+                : <Register />
             } 
           />
 
           {/* Protected routes */}
           <Route 
             element={
-              isAuthenticated ? (
+              localStorage.getItem('accessToken') ? (
                 <Layout>
                   <Outlet />
                 </Layout>
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to="/login" />
               )
             }
           >

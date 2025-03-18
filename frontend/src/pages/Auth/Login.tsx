@@ -17,6 +17,7 @@ import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import wsLogo from '../../assets/images/ws1.png';
 import { AUTH_BASE_URL } from '../../config.ts';
+import { useNavigate } from 'react-router-dom';
 
 interface LoginFormData {
   email: string;
@@ -31,6 +32,7 @@ const Login = () => {
     email: '',
     password: '',
   });
+  const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -85,12 +87,8 @@ const Login = () => {
         const storedAccessToken = localStorage.getItem('accessToken');
         console.log('Stored access token:', storedAccessToken ? 'Present' : 'Missing');
         
-        // Use React Router for navigation if available
-        if (window.location.pathname !== '/dashboard') {
-          console.log('Redirecting to dashboard...');
-          // Force a hard navigation to ensure everything is reloaded
-          window.location.href = '/dashboard';
-        }
+        // Use React Router's navigate for client-side navigation
+        navigate('/dashboard');
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');
