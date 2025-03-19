@@ -11,30 +11,34 @@ import {
   InputAdornment,
   Alert,
   useTheme,
+  Paper,
+  CircularProgress,
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import oilRigImage from '../../assets/images/oil.jpg';
 import wsLogo from '../../assets/images/ws1.png';
 import { AUTH_BASE_URL } from '../../config.ts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from './AuthContext.tsx';
+import { Link as MuiLink } from '@mui/material';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-const Login = () => {
+const Login: React.FC = () => {
   const theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
   });
   const navigate = useNavigate();
-  const { setIsAuthenticated } = useAuth();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -46,6 +50,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
       const loginUrl = `${AUTH_BASE_URL}/login/`;
@@ -75,25 +80,13 @@ const Login = () => {
       console.log('Login response:', response.data);
 
       if (response.data.token?.access) {
-        // Store tokens in localStorage
-        localStorage.setItem('accessToken', response.data.token.access);
-        localStorage.setItem('refreshToken', response.data.token.refresh);
-        
-        // Set default Authorization header for future requests
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token.access}`;
+        // Use the login function from context
+        login(response.data.token.access, response.data.token.refresh);
         
         console.log('Login successful, tokens stored');
         
-        // Check if tokens were properly stored
-        const storedAccessToken = localStorage.getItem('accessToken');
-        console.log('Stored access token:', storedAccessToken ? 'Present' : 'Missing');
-        
-        // Use React Router for navigation if available
-        if (window.location.pathname !== '/dashboard') {
-          console.log('Redirecting to dashboard...');
-          // Force a hard navigation to ensure everything is reloaded
-          window.location.href = '/dashboard';
-        }
+        // Navigate to dashboard
+        navigate('/dashboard');
       } else {
         console.error('Invalid response format:', response.data);
         setError('Invalid login response format');
@@ -137,6 +130,8 @@ const Login = () => {
       } else {
         setError('Unable to connect to the server. Please try again later.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -320,10 +315,24 @@ const Login = () => {
                 }}
               />
 
+              {/* <Box sx={{ textAlign: 'right', mt: 1 }}>
+                <MuiLink 
+                  component={RouterLink} 
+                  to="/forgot-password" 
+                  sx={{ 
+                    color: '#F97316',
+                    fontSize: '0.875rem'
+                  }}
+                >
+                  Forgot password?
+                </MuiLink>
+              </Box> */}
+
               <Stack direction="row" spacing={2}>
                 <Button
                   variant="outlined"
                   size="large"
+                  onClick={() => navigate('/forgot-password')}
                   sx={{
                     flex: 1,
                     bgcolor: '#262b38',

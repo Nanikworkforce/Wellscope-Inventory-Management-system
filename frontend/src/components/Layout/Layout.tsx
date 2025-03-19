@@ -37,7 +37,7 @@ import dkLogo from '../../assets/images/dkbg.jpg';
 import manImage from '../../assets/images/man1.jpg';
 import { useAuth } from '../../pages/Auth/AuthContext.tsx';
 
-const drawerWidth = 120;
+const drawerWidth = 50;
 
 interface LayoutProps {
   children: React.ReactNode;

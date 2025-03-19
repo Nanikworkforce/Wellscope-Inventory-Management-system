@@ -26,6 +26,8 @@ import Profile from './components/Profile/Profile.tsx';
 import VerifyEmail from './pages/Auth/VerifyEmail.tsx';
 import { AuthProvider, useAuth } from './pages/Auth/AuthContext.tsx';
 import axios from 'axios';
+import ForgotPassword from './pages/Auth/ForgotPassword.tsx';
+import ResetPassword from './pages/Auth/ResetPassword.tsx';
 
 const theme = createTheme({
   palette: {
@@ -120,6 +122,8 @@ const AppRoutes = () => {
         } 
       />
       <Route path="/verify-email" element={<VerifyEmail />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected routes */}
       <Route 

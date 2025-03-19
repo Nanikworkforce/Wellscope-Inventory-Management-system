@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
-
+from django.contrib.auth.password_validation import validate_password
+from .models import ResetPassword
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -65,3 +66,18 @@ class VerifyEmailSerializer(serializers.Serializer):
     class Meta:
         model = User
         fields = ['token']
+
+class RequestPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=10)
+
+    class Meta:
+        fields = ['email']
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField(min_length=10)
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True,validators=[validate_password],required=True)
+
+    class Meta:
+        model = ResetPassword
+        fields = ['email','code']
