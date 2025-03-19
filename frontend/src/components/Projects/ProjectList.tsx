@@ -36,6 +36,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import bgImage from '../../assets/images/bg.jpg';
 import { API_BASE_URL } from '../../config.ts';
+import { useAuth } from '../../pages/Auth/AuthContext.tsx';
 
 interface Project {
   id: number;
@@ -61,6 +62,7 @@ interface Project {
     name: string;
     serialNumber: string;
   }>;
+  budget: number;
 }
 
 const ProjectList: React.FC = () => {
@@ -70,21 +72,37 @@ const ProjectList: React.FC = () => {
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState<number | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/projects/`);
+        setLoading(true);
+        const token = getToken();
+        
+        if (!token) {
+          setError('Authentication token not found');
+          setLoading(false);
+          return;
+        }
+        
+        const response = await axios.get(`${API_BASE_URL}/projects/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
         setProjects(response.data);
         setLoading(false);
       } catch (err) {
+        console.error('Failed to fetch projects', err);
         setError('Failed to fetch projects');
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, []);
+  }, [getToken]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,7 +140,18 @@ const ProjectList: React.FC = () => {
   const confirmDelete = async () => {
     if (projectToDelete) {
       try {
-        await axios.delete(`${API_BASE_URL}/projects/${projectToDelete}/`);
+        const token = getToken();
+        
+        if (!token) {
+          setError('Authentication token not found');
+          return;
+        }
+        
+        await axios.delete(`${API_BASE_URL}/projects/${projectToDelete}/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
         setProjects(projects.filter(project => project.id !== projectToDelete));
         setDeleteDialogOpen(false);
         setProjectToDelete(null);
