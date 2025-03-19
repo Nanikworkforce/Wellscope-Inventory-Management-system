@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import { API_BASE_URL, AUTH_BASE_URL } from '../../config';
+import { API_BASE_URL, AUTH_BASE_URL } from '../../config.ts';
 
 interface AuthContextType {
   isAuthenticated: boolean;
