@@ -181,10 +181,10 @@ const ProjectList: React.FC = () => {
       }}
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" gutterBottom sx={{ color: '#d47f39' }}>
+        <Typography variant="h4" gutterBottom sx={{ color: '#A0ADA8' }}>
           Projects
         </Typography>
-        <Typography variant="subtitle1" sx={{ color: '#d47f39' }}>
+        <Typography variant="subtitle1" sx={{ color: '#A0ADA8' }}>
           Manage your ongoing projects
         </Typography>
         <Button
@@ -207,37 +207,37 @@ const ProjectList: React.FC = () => {
           <TableHead>
             <TableRow>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Project Name
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Customer
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Timeline
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Location
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Status & Progress
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Equipment Assigned
                 </Typography>
               </TableCell>
               <TableCell>
-                <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                   Actions
                 </Typography>
               </TableCell>
@@ -318,9 +318,9 @@ const ProjectList: React.FC = () => {
                         size="small"
                         onClick={() => navigate(`/projects/${project.id}`)}
                         sx={{ 
-                          color: '#d47f39',
+                          color: '#A0ADA8',
                           '&:hover': {
-                            bgcolor: 'rgba(212, 127, 57, 0.04)'
+                            bgcolor: 'rgba(160, 173, 168, 0.04)'
                           }
                         }}
                       >
@@ -332,9 +332,9 @@ const ProjectList: React.FC = () => {
                         size="small"
                         onClick={() => navigate(`/projects/edit/${project.id}`)}
                         sx={{ 
-                          color: '#d47f39',
+                          color: '#A0ADA8',
                           '&:hover': {
-                            bgcolor: 'rgba(212, 127, 57, 0.04)'
+                            bgcolor: 'rgba(160, 173, 168, 0.04)'
                           }
                         }}
                       >
@@ -346,9 +346,9 @@ const ProjectList: React.FC = () => {
                         size="small"
                         onClick={() => handleDelete(project.id)}
                         sx={{ 
-                          color: '#d47f39',
+                          color: '#A0ADA8',
                           '&:hover': {
-                            bgcolor: 'rgba(212, 127, 57, 0.04)'
+                            bgcolor: 'rgba(160, 173, 168, 0.04)'
                           }
                         }}
                       >

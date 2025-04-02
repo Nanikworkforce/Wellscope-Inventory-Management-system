@@ -57,7 +57,7 @@ const VerifyEmail = () => {
           {verificationStatus === 'loading' && (
             <>
               <CircularProgress sx={{ mb: 2 }} />
-              <Typography variant="h5" gutterBottom>
+              <Typography variant="h5" color="#A0ADA8" gutterBottom>
                 Verifying your email...
               </Typography>
             </>

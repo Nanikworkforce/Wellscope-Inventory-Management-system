@@ -244,8 +244,8 @@ const AddEquipment: React.FC = () => {
                   variant="outlined" 
                   onClick={() => navigate('/equipment')}
                   sx={{ 
-                    color: '#F97316',
-                    borderColor: '#F97316',
+                    color: '#A0ADA8',
+                    borderColor: '#A0ADA8',
                     '&:hover': {
                       borderColor: '#EA580C',
                       bgcolor: 'rgba(249, 115, 22, 0.04)'
@@ -258,7 +258,7 @@ const AddEquipment: React.FC = () => {
                   type="submit" 
                   variant="contained"
                   sx={{ 
-                    bgcolor: '#F97316',
+                    bgcolor: '#A0ADA8',
                     '&:hover': {
                       bgcolor: '#EA580C'
                     }

@@ -157,10 +157,10 @@ const EquipmentCategory: React.FC = () => {
     >
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h4" gutterBottom sx={{ color: '#d47f39' }}>
+          <Typography variant="h4" gutterBottom sx={{ color: '#A0ADA8' }}>
             Equipment Categories
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: '#d47f39' }}>
+          <Typography variant="subtitle1" sx={{ color: '#A0ADA8' }}>
             Manage and organize your equipment inventory by categories
           </Typography>
         </Box>
@@ -169,9 +169,9 @@ const EquipmentCategory: React.FC = () => {
           startIcon={<AddIcon />}
           onClick={handleOpen}
           sx={{ 
-            bgcolor: '#d47f39',
+            bgcolor: '#A0ADA8',
             '&:hover': {
-              bgcolor: '#c2410c'
+              bgcolor: '#808080'
             }
           }}
         >
@@ -192,14 +192,14 @@ const EquipmentCategory: React.FC = () => {
             >
               <CardContent>
                 <Stack direction="row" spacing={2} alignItems="center">
-                  <Box sx={{ color: '#d47f39' }}>
+                  <Box sx={{ color: '#A0ADA8' }}>
                     {stat.icon}
                   </Box>
                   <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                       {stat.value}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: '#d47f39' }}>
+                    <Typography variant="body2" sx={{ color: '#A0ADA8' }}>
                       {stat.title}
                     </Typography>
                   </Box>
@@ -231,32 +231,32 @@ const EquipmentCategory: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Category Name
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Description
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Equipment Count
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Usage
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Created At
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography sx={{ color: '#d47f39', fontWeight: 500 }}>
+                  <Typography sx={{ color: '#A0ADA8', fontWeight: 500 }}>
                     Actions
                   </Typography>
                 </TableCell>
@@ -267,7 +267,7 @@ const EquipmentCategory: React.FC = () => {
                 <TableRow key={category.id} hover>
                   <TableCell>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      <CategoryIcon sx={{ color: '#d47f39' }} />
+                      <CategoryIcon sx={{ color: '#A0ADA8' }} />
                       <Typography variant="subtitle2">{category.name}</Typography>
                     </Stack>
                   </TableCell>
@@ -278,7 +278,7 @@ const EquipmentCategory: React.FC = () => {
                       size="small"
                       sx={{ 
                         bgcolor: 'rgba(212, 127, 57, 0.1)',
-                        color: '#d47f39'
+                        color: '#A0ADA8'
                       }}
                     />
                   </TableCell>
@@ -293,7 +293,7 @@ const EquipmentCategory: React.FC = () => {
                           borderRadius: 3,
                           bgcolor: 'rgba(212, 127, 57, 0.1)',
                           '& .MuiLinearProgress-bar': {
-                            bgcolor: '#d47f39'
+                            bgcolor: '#A0ADA8'
                           }
                         }}
                       />
@@ -319,7 +319,7 @@ const EquipmentCategory: React.FC = () => {
                           size="small"
                           onClick={() => handleEdit(category)}
                           sx={{ 
-                            color: '#d47f39',
+                            color: '#A0ADA8',
                             '&:hover': {
                               bgcolor: 'rgba(212, 127, 57, 0.04)'
                             }
@@ -333,7 +333,7 @@ const EquipmentCategory: React.FC = () => {
                           size="small"
                           onClick={() => handleDelete(category.id)}
                           sx={{ 
-                            color: '#d47f39',
+                            color: '#A0ADA8',
                             '&:hover': {
                               bgcolor: 'rgba(212, 127, 57, 0.04)'
                             }
@@ -380,7 +380,7 @@ const EquipmentCategory: React.FC = () => {
           <DialogActions>
             <Button 
               onClick={handleClose}
-              sx={{ color: '#d47f39' }}
+              sx={{ color: '#A0ADA8' }}
             >
               Cancel
             </Button>
@@ -388,9 +388,9 @@ const EquipmentCategory: React.FC = () => {
               type="submit"
               variant="contained"
               sx={{ 
-                bgcolor: '#d47f39',
+                bgcolor: '#A0ADA8',
                 '&:hover': {
-                  bgcolor: '#c2410c'
+                  bgcolor: '#808080'
                 }
               }}
             >

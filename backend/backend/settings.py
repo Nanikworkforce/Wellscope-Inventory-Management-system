@@ -60,7 +60,7 @@ MIDDLEWARE = [
 ]
 
 # During development, you can use this setting
-CORS_ALLOW_ALL_ORIGINS = True  # Only use this for development!
+CORS_ALLOW_ALL_ORIGINS = True  
 
 # For production, use this instead:
 CORS_ALLOWED_ORIGINS = [

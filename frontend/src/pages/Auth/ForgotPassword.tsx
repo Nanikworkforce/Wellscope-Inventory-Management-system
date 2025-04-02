@@ -88,7 +88,7 @@ const ForgotPassword: React.FC = () => {
     <Container maxWidth="sm">
       <Box sx={{ mt: 8, mb: 4 }}>
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#F97316' }}>
+          <Typography variant="h4" component="h1" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#A0ADA8' }}>
             Forgot Password
           </Typography>
           
@@ -97,7 +97,7 @@ const ForgotPassword: React.FC = () => {
           </Typography>
           
           {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mb: 2, color: '#A0ADA8' }}>
               {error}
             </Alert>
           )}
@@ -131,9 +131,9 @@ const ForgotPassword: React.FC = () => {
                 mt: 3, 
                 mb: 2, 
                 py: 1.2,
-                bgcolor: '#F97316',
+                bgcolor: '#A0ADA8',
                 '&:hover': {
-                  bgcolor: '#EA580C'
+                  bgcolor: '#8A8A8A'
                 }
               }}
               disabled={loading}
@@ -144,7 +144,7 @@ const ForgotPassword: React.FC = () => {
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Typography variant="body2">
                 Remember your password?{' '}
-                <MuiLink component={Link} to="/login" sx={{ color: '#F97316' }}>
+                <MuiLink component={Link} to="/login" sx={{ color: '#A0ADA8' }}>
                   Back to Login
                 </MuiLink>
               </Typography>
